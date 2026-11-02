@@ -1,0 +1,139 @@
+%% PhotonicsAI — Agent Workflow, Architecture v0.1 (PROPOSED, not approved)
+%% Every agent-to-agent message is routed through the Local Orchestrator.
+%% Tools (executable capabilities) and Skills (documented procedures) are
+%% PROPOSED only — none is installed or implemented.
+%%
+%% Line styles (see legend in the diagram):
+%%   thin solid            = agent message / structured artifact
+%%   thick purple          = hardware control command / device data
+%%   green, circle end     = physical optical path
+%%   orange, circle end    = physical electrical drive
+%%   dashed                = feedback loop, optional route, or denial
+%%   gold / thick red      = human checkpoint (H2 thick red = mandatory)
+%%
+%% NOTE: linkStyle indices below depend on edge order. If you add or remove
+%% an edge, update the linkStyle lines.
+flowchart TB
+    HUMAN["👤 Human / Researcher<br/>sets goals · reviews · decides<br/>checkpoints H1–H4"]
+    EXT["Chief Orchestrator platform<br/>future, external — protocol OPEN"]
+
+    subgraph BOUNDARY["PhotonicsAI system boundary — PROPOSED"]
+        direction TB
+        ORCH{{"Local Orchestrator — non-LLM<br/>workflow state · routing · task IDs<br/>approval / failure / retry log"}}
+        RULE["⚠ RULE: every loop that leads to a new real measurement<br/>→ new ExperimentPlan → renewed H2 approval<br/>a previous approval_ref is never reused"]
+
+        subgraph AGENTS["LLM agents — reasoning only, no direct device I/O<br/>🔧 proposed tools · 📘 proposed skills — none installed"]
+            direction LR
+            SCI["<b>Scientist</b><br/>🔧 literature search, knowledge base<br/>📘 method selection, hypotheses,<br/>success criteria"]
+            EXP["<b>Experimentalist</b><br/>🔧 device-capability profile (TBD),<br/>plan template / checker<br/>📘 protocol design, parameter planning,<br/>calibration & quality checks"]
+            EXE["<b>Executioner</b><br/>🔧 abstract adapter interfaces,<br/>acquisition sequencer, logger<br/>📘 approved-sequence execution,<br/>pre-run checks, fault handling"]
+            ANA["<b>Analyst</b><br/>🔧 Python, NumPy, SciPy,<br/>image processing, plotting<br/>📘 response vs. voltage, switching,<br/>speckle statistics, uncertainty"]
+            REV["<b>Scientific Reviewer</b><br/>🔧 read-only artifact access,<br/>statistical checks<br/>📘 evidence vs. success criteria,<br/>validity & reproducibility"]
+            COD["<b>Coder — OPTIONAL</b><br/>🔧 sandboxed editing, execution, tests<br/>📘 test-first data-processing code<br/>no device access"]
+        end
+
+        subgraph CONTROL["Deterministic control layer — non-LLM"]
+            direction TB
+            GATE["🛡 Hardware Safety Gateway<br/>default-deny · approved limits & allowlist<br/>limits TBD · REAL EXECUTION DISABLED"]
+            ADP["Abstract hardware adapters<br/>SLM · signal generator · camera<br/>interfaces TBD — no SDK calls defined"]
+        end
+    end
+
+    subgraph LAB["Optical bench — physical layer, simplified"]
+        direction LR
+        LAS["Coherent Viper-V5<br/>532 nm laser<br/>software interface: TBD<br/>none assumed"]
+        SLM["Meadowlark<br/>phase-only SLM<br/>1920×1152"]
+        LC["LC scattering cell<br/>black box"]
+        CAM["ALKERIA Celera<br/>camera"]
+        GEN["RIGOL DG812<br/>signal generator"]
+    end
+
+    %% ---- Primary workflow: agent messages / structured artifacts (0–13) ----
+    HUMAN -->|"ResearchGoal"| ORCH
+    ORCH -->|"ResearchGoal"| SCI
+    SCI -->|"MethodProposal"| ORCH
+    ORCH <-->|"H1 · MethodProposal ⇄ accept / request revision"| HUMAN
+    ORCH -->|"accepted MethodProposal"| EXP
+    EXP -->|"ExperimentPlan"| ORCH
+    ORCH <-->|"H2 · MANDATORY before any real run:<br/>ExperimentPlan ⇄ approve with approval_ref / reject"| HUMAN
+    ORCH -->|"ExecutionRequest + approval_ref"| EXE
+    EXE -->|"MeasurementDataset + status"| ORCH
+    ORCH -->|"MeasurementDataset"| ANA
+    ANA -->|"AnalysisReport + follow-up requests"| ORCH
+    ORCH -->|"AnalysisReport"| REV
+    REV -->|"ReviewDecision: accept / replan / more data"| ORCH
+    ORCH <-->|"H3 · ReviewDecision ⇄ final human decision"| HUMAN
+
+    %% ---- Feedback loops, via Orchestrator (14–16) ----
+    ORCH -.->|"F1 · more data → revised ExperimentPlan → renewed H2"| EXP
+    ORCH -.->|"F2 · replan → revised MethodProposal → H1 again"| SCI
+    GATE -.->|"F4 · denied / fault"| ORCH
+
+    %% ---- Optional Coder route (17–19) ----
+    ORCH -.->|"F5 · code task, optional"| COD
+    COD -.->|"tested code"| ORCH
+    ORCH <-.->|"H4 · optional: tested code ⇄ approve / reject integration"| HUMAN
+
+    %% ---- Hardware control commands / device data (20–26) ----
+    EXE ==>|"abstract device commands"| GATE
+    GATE ==>|"validated commands only"| ADP
+    ADP ==>|"phase pattern"| SLM
+    ADP ==>|"waveform settings"| GEN
+    ADP ==>|"acquisition settings"| CAM
+    CAM ==>|"raw frames"| ADP
+    ADP ==>|"data + device status"| EXE
+
+    %% ---- Physical paths (27–30) ----
+    LAS --o|"532 nm beam"| SLM
+    SLM --o|"phase-modulated beam"| LC
+    LC --o|"scattered light / speckle"| CAM
+    GEN --o|"electrical drive voltage"| LC
+
+    %% ---- Future integration boundary (31) ----
+    EXT <-.->|"future integration: artifacts + status only"| ORCH
+
+    %% ---- Layout helper, invisible (32) ----
+    ORCH ~~~ RULE
+
+    %% ---- Legend (33–37) ----
+    subgraph LEGEND["Legend — line types"]
+        direction LR
+        LGa1[" "] -->|"agent message / artifact"| LGa2[" "]
+        LGb1[" "] ==>|"hardware control / device data"| LGb2[" "]
+        LGc1[" "] --o|"physical optical path"| LGc2[" "]
+        LGd1[" "] --o|"physical electrical drive"| LGd2[" "]
+        LGe1[" "] -.->|"feedback · optional · denial"| LGe2[" "]
+    end
+
+    %% ---- Link styles ----
+    linkStyle 3,13 stroke:#b8860b,stroke-width:2.5px
+    linkStyle 6 stroke:#d32f2f,stroke-width:4px
+    linkStyle 19 stroke:#b8860b,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 20,21,22,23,24,25,26,34 stroke:#7b1fa2,stroke-width:3px
+    linkStyle 27,28,29,35 stroke:#2e7d32,stroke-width:4px
+    linkStyle 30,36 stroke:#ef6c00,stroke-width:3px
+
+    %% ---- Node styles ----
+    classDef human fill:#fff3c4,stroke:#b8860b,stroke-width:2px,color:#000
+    classDef orch fill:#d6e4ff,stroke:#1f4fbf,stroke-width:2px,color:#000
+    classDef agent fill:#e3f6e3,stroke:#2e7d32,color:#000
+    classDef optional fill:#f2f2f2,stroke:#888,stroke-dasharray:5 5,color:#333
+    classDef safety fill:#ffd6d6,stroke:#c62828,stroke-width:3px,color:#000
+    classDef adapter fill:#f5e1ff,stroke:#7b1fa2,color:#000
+    classDef hw fill:#e0e0e0,stroke:#424242,color:#000
+    classDef tbd fill:#e0e0e0,stroke:#424242,stroke-dasharray:4 4,color:#000
+    classDef external fill:#ffffff,stroke:#555,stroke-dasharray:3 3,color:#000
+    classDef rule fill:#fff8e1,stroke:#d32f2f,color:#000
+    classDef legend fill:#ffffff,stroke:#bbb,color:#000
+
+    class HUMAN human
+    class ORCH orch
+    class SCI,EXP,EXE,ANA,REV agent
+    class COD optional
+    class GATE safety
+    class ADP adapter
+    class SLM,CAM,GEN,LC hw
+    class LAS tbd
+    class EXT external
+    class RULE rule
+    class LGa1,LGa2,LGb1,LGb2,LGc1,LGc2,LGd1,LGd2,LGe1,LGe2 legend

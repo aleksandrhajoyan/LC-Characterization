@@ -1,0 +1,108 @@
+%% PhotonicsAI — Professor overview, Architecture v0.1 (PROPOSED, not approved)
+%% Compact landscape view for scientific architecture review (Step 05 layout).
+%% Technical detail (every route, feedback loop F1–F5, full legend) stays in
+%% agent_workflow.mmd, ARCHITECTURE.md, AGENTS.md, and DATA_CONTRACTS.md.
+%%
+%% Layout (left to right): ① human + external platform → ② Local Orchestrator
+%% → ③ six agents → ④ hardware side (Safety Gateway above the optical bench).
+%% "~~~" links are invisible layout helpers that only place notes in a column.
+%%
+%% Reading guide:
+%%   <-->   structured artifacts, always through the Local Orchestrator
+%%   <==>   hardware requests / device data, Executioner only, via the Gateway
+%%   --o    physical optical or electrical path
+%%   <-.->  future, not yet integrated
+%% No direct agent-to-agent edges: the logical workflow is shown as text only.
+%% No linkStyle rules are used, so edges can be edited without index bookkeeping.
+flowchart LR
+    subgraph L1["① Human oversight · external platform"]
+        BANNER["<b>PROPOSED — NOT APPROVED</b><br/>PhotonicsAI architecture v0.1<br/>Tools / Skills = proposed, not installed"]
+        HUMAN["<b>Human / Researcher</b><br/>sets research goals<br/>H1 method review<br/>H2 approval before real execution<br/>— MANDATORY<br/>H3 final result decision<br/>H4 Coder review — optional"]
+        EXT["<b>Chief Orchestrator</b><br/>external · future<br/>NOT INTEGRATED · interface OPEN"]
+    end
+
+    subgraph L2["② Local Orchestrator — hub"]
+        ORCH["<b>Local Orchestrator</b><br/>deterministic · non-LLM<br/>routes artifacts<br/>tracks workflow state<br/>records approvals<br/>routes feedback and errors"]
+        FLOW["<b>Logical workflow</b> — every step via Orchestrator<br/>ResearchGoal → Scientist → Experimentalist<br/>→ Executioner → Analyst → Reviewer → Human<br/><br/><b>7 artifacts</b> (DATA_CONTRACTS.md)<br/>ResearchGoal · MethodProposal (H1)<br/>ExperimentPlan (H2) · ExecutionRequest<br/>MeasurementDataset · AnalysisReport<br/>ReviewDecision (H3)<br/><br/><b>Feedback</b> returns via Orchestrator<br/>new real run → new plan → renewed H2"]
+        LEGEND["<b>Legend</b><br/>thin line: bidirectional structured<br/>artifact exchange, via Orchestrator only<br/>thick line: hardware request / data<br/>circle end: physical optical / electrical path<br/>dashed: future or optional"]
+    end
+
+    subgraph L3["③ Scientific agents (LLM) — PROPOSED · no direct agent-to-agent links"]
+        SCI["<b>1 · Scientist</b><br/>methods, hypotheses, criteria<br/>Tool: literature search<br/>Skill: method selection"]
+        EXP["<b>2 · Experimentalist</b><br/>methods → experiment protocols<br/>Tool: plan completeness checker<br/>Skill: protocol design"]
+        EXE["<b>3 · Executioner</b><br/>runs H2-approved requests<br/>only agent with hardware access<br/>Tool: acquisition sequencer<br/>Skill: pre-run checklist"]
+        ANA["<b>4 · Analyst</b><br/>optical metrics + uncertainty<br/>Tool: Python / NumPy / SciPy<br/>Skill: speckle statistics"]
+        REV["<b>5 · Scientific Reviewer</b><br/>evidence vs. success criteria<br/>Tool: statistical checks, read-only<br/>Skill: accept / replan advice"]
+        COD["<b>Coder — OPTIONAL</b><br/>sandboxed data-processing code<br/>Tool: sandboxed test runner<br/>Skill: test-first implementation"]
+    end
+
+    subgraph HW["④ Hardware side — reachable only via Executioner → Gateway"]
+        direction TB
+        GATE["<b>Hardware Safety Gateway</b><br/>deterministic · non-LLM<br/>DEFAULT-DENY · limits TBD<br/>needs valid H2 approval_ref<br/><b>REAL EXECUTION DISABLED</b>"]
+        ADP["<b>Hardware adapters</b><br/>SLM · RIGOL · camera — TBD<br/>no laser interface assumed"]
+        subgraph BENCH["Optical bench — conceptual path, geometry unconfirmed"]
+            direction TB
+            LAS["<b>Laser 532 nm</b><br/>Coherent Viper-V5<br/>software control TBD"]
+            SLM["<b>Meadowlark SLM</b><br/>phase-only"]
+            LC["<b>LC scattering cell</b><br/>black box"]
+            CAM["<b>ALKERIA camera</b><br/>Celera"]
+            GEN["<b>RIGOL DG812</b><br/>signal generator"]
+        end
+    end
+
+    %% Layout helpers (invisible): place the notes in the Orchestrator column
+    HUMAN ~~~ FLOW
+    EXT ~~~ LEGEND
+
+    %% Human and external platform connect only to the Local Orchestrator
+    HUMAN <-->|"goals · H1–H4"| ORCH
+    EXT <-.->|"future"| ORCH
+
+    %% Hub-and-spoke: each agent exchanges artifacts only with the Orchestrator
+    ORCH <--> SCI
+    ORCH <--> EXP
+    ORCH <--> EXE
+    ORCH <--> ANA
+    ORCH <--> REV
+    ORCH <-.-> COD
+
+    %% Hardware access: Executioner → Safety Gateway → adapters → devices
+    EXE <==>|"requests · data"| HW
+    GATE <==>|"validated only"| ADP
+    ADP <==> BENCH
+
+    %% Physical paths: optical and electrical
+    LAS --o SLM
+    SLM --o LC
+    LC --o|"speckle"| CAM
+    GEN --o|"voltage"| LC
+
+    classDef banner fill:#fde2e2,stroke:#b71c1c,stroke-width:3px,color:#000
+    classDef human fill:#fff3c4,stroke:#8a6d00,stroke-width:2px,color:#000
+    classDef external fill:#ffffff,stroke:#555555,stroke-dasharray:5 5,color:#000
+    classDef orch fill:#d6e4ff,stroke:#1f4fbf,stroke-width:3px,color:#000
+    classDef note fill:#ffffff,stroke:#888888,color:#000
+    classDef agent fill:#e3f6e3,stroke:#2e7d32,stroke-width:1.5px,color:#000
+    classDef optional fill:#f2f2f2,stroke:#666666,stroke-dasharray:5 5,color:#000
+    classDef safety fill:#ffd6d6,stroke:#c62828,stroke-width:3px,color:#000
+    classDef adapter fill:#f3e5f5,stroke:#6a1b9a,stroke-dasharray:4 4,color:#000
+    classDef hw fill:#eceff1,stroke:#37474f,color:#000
+    classDef tbd fill:#eceff1,stroke:#37474f,stroke-dasharray:4 4,color:#000
+
+    class BANNER banner
+    class HUMAN human
+    class EXT external
+    class ORCH orch
+    class FLOW,LEGEND note
+    class SCI,EXP,EXE,ANA,REV agent
+    class COD optional
+    class GATE safety
+    class ADP adapter
+    class SLM,LC,CAM,GEN hw
+    class LAS tbd
+
+    style L1 fill:#fffdf3,stroke:#8a6d00,color:#000
+    style L2 fill:#f4f7ff,stroke:#1f4fbf,color:#000
+    style L3 fill:#f6fbf6,stroke:#2e7d32,color:#000
+    style HW fill:#fff6f6,stroke:#c62828,stroke-width:2px,color:#000
+    style BENCH fill:#f7f9fa,stroke:#37474f,color:#000
