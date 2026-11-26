@@ -62,3 +62,80 @@ project. **PROVISIONAL** = a proposed design choice, open to change.
     the architecture diagram (A5); this question concerns the subsequent
     implementation phase. No MVP scope or evaluation criteria have been
     approved yet.
+
+## Operational decisions — 2026-11-26 (C07-STATE-CHECKPOINT)
+
+The earlier entries are preserved as the historical v0.1 decision record.
+The current architecture direction remains **PROPOSED v0.2** in
+[docs/ARCHITECTURE_V02_DRAFT.md](docs/ARCHITECTURE_V02_DRAFT.md); positive
+professor feedback is reported, not blanket implementation or experiment
+approval. In particular, A7 describes the earlier documentation-only phase;
+C04A has since added an offline validator and tests. P9 does not negate the
+later vendor SDK inventory below or select a runtime framework. These dated
+operational decisions do not migrate the historical architecture or contracts.
+Laboratory facts below are supplied verified C07 evidence, not checks repeated
+on the home PC. See [CURRENT_STATE.md](CURRENT_STATE.md) for the full boundary.
+
+### C07-D1 — Preserve home/lab role separation
+
+**Date:** 2026-11-26. **Status: ACCEPTED operational boundary.**
+
+The home repository is the canonical project/documentation source. The lab
+workspace is the bounded equipment/SDK execution environment. Codex (ALEX)
+and Codex (LAB) are distinct executor contexts; evidence or authorization in
+one does not imply unrestricted execution authority in the other.
+
+Historical naming correction: `D:\Nikita\TM benchmark` was the earlier name
+of the same workspace now named `D:\Nikita\LC characterization (Alex)`, not
+a separate Mkrtich project. The old path is stale historical naming only.
+The current lab folder contains only `AGENTS.md`, manually updated to the
+current authorized path; separately supplied task examples are not canonical
+files there.
+
+### C07-D2 — Use isolated CPython 3.9 for the legacy ALKERIA binding
+
+**Date:** 2026-11-26. **Status: ACCEPTED compatibility decision.**
+
+The inspected vendor binding contains `_core.cp39-win_amd64.pyd` and was
+classified `CP39_ONLY_BINARY_PACKAGE`. No compatible CP312 binary or
+buildable native-extension source was found in the inspected package/archive.
+Use the isolated lab environment `C:\Users\Dell\Envs\PhotonicsAI-LC-py39`
+(verified CPython 3.9.25, Windows AMD64, NumPy 1.26.4); copied package hashes
+matched the source.
+
+Constraints: do not replace existing Python 3.12, do not modify Anaconda
+base unnecessarily, and do not modify global PATH. Existing Python 3.12
+installations were not intentionally modified, Anaconda base was not targeted,
+and PATH was not modified during the supplied validation sequence. Native
+module loading establishes software compatibility only, not camera operation.
+
+### C07-D3 — Escalate camera access in separately approved stages
+
+**Date:** 2026-11-26. **Status: ACCEPTED operational boundary.**
+
+Completed sequence: OS/device visibility → SDK inventory → Python wrapper
+inspection → isolated Python 3.9 compatibility environment → plain wrapper
+import → native `_core` load. Plain `import alkusb3` did not load the native
+module; controlled `import alkusb3._core` loaded it successfully. No vendor
+function or class was invoked in that native-load test.
+
+Camera construction, enumeration, and acquisition remain separately approved
+stages, none performed. Before any further camera hardware call, the
+Architect must define and the human must explicitly approve the minimum
+camera-object construction test and its allowed observations. That test is
+**not already approved**. Installation and import success grant no hardware
+permission.
+
+### C07-D4 — Stop C06A discovery before hardware
+
+**Date:** 2026-11-26. **Status: ACCEPTED stop; future procedure OPEN.**
+
+Static inspection found `device_interface.get_camera_list(self)` to be an
+instance method delegating to `self._obj.get_camera_list()`, requiring an
+existing native device/camera object in the ordinary wrapper path. A
+sufficiently bounded discovery path without construction was not established.
+
+C06A is `BLOCKED_BY_WRAPPER_BEHAVIOR`: discovery calls 0, camera classes
+instantiated 0, acquisition 0, hardware query 0. This was an intentional
+safety stop, not a software failure. Do not bypass this boundary without a
+separately reviewed procedure and explicit human approval of its scope.

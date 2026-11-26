@@ -1,15 +1,32 @@
 # Current State
 
-_Last updated: 2026-11-26 (C04B — state reconciliation after C02A/C02B/C04A)_
+_Last updated: 2026-11-26 (C07-R1 — Architect review corrections)_
 
 ## Current objective
 
-Review/checkpoint the completed C04A offline Analyst validator against the
-proposed v0.2 direction in
-[docs/ARCHITECTURE_V02_DRAFT.md](docs/ARCHITECTURE_V02_DRAFT.md). C03A laboratory
-inventory remains deferred pending sufficiently defined authorization and
-path details; separately authorized offline home-PC development may continue.
-This handoff authorizes no next implementation step or laboratory action.
+Define and obtain explicit human approval for the minimum camera-object
+construction test and its allowed observations. Camera-object construction
+has **not been performed**, and the test is **not yet approved**. Device
+enumeration, camera-setting reads, camera-setting writes, and acquisition
+remain separate stages requiring their own approval.
+
+C07 reconciliation is complete. **Current milestone:** camera software stack
+validated through native module loading; first safe hardware interaction
+remains pending because wrapper discovery requires a native device/camera
+object. C06A stopped before hardware with `BLOCKED_BY_WRAPPER_BEHAVIOR`.
+This documentation checkpoint authorizes no next implementation step or
+laboratory action.
+
+Evidence labels used below:
+
+- **VERIFIED:** local checks explicitly identified as such, or completed lab
+  checks supplied as verified evidence in the C07 task. The lab checks were
+  not independently repeated by Codex (ALEX).
+- **REPORTED:** researcher/Architect reports without a corresponding verified
+  check identified here.
+- **PROPOSED:** design or candidate work, not implementation or approval.
+- **UNKNOWN / NOT TESTED:** evidence or execution remains absent; no success
+  is inferred from installation, import, or OS visibility.
 
 **Architecture status: v0.2 PROPOSED.** Professor Nikita positively reviewed
 the revised direction, as reported by the researcher/Architect for C01. This
@@ -35,8 +52,9 @@ validated safety limits, or experiments.
   direction. They remain unchanged in C01. In particular, the old
   all-messages-through-Orchestrator rule is not the revised direction.
   Development safety and task-scope restrictions still apply.
-- C01 added documentation only. C01 changes remain uncommitted in the
-  current working tree, as verified locally in C04B; see Repository below.
+- C01 added documentation only. C01 changes were uncommitted when verified
+  locally in C04B; that is historical status, superseded by the C07 local
+  repository check below.
   No hardware limits or operational software-control interfaces have been
   validated/established by this project. Initial real operations remain
   human-controlled and require authorization and deterministic restrictions.
@@ -53,17 +71,22 @@ validated safety limits, or experiments.
 ## Inventory evidence — C02A / C02B / C03A
 
 The prior findings and user evidence below are recorded for handoff; C04B did
-not access laboratory paths or the external SDK-source folder.
+not access laboratory paths or the external SDK-source folder. C07 corrects
+the workspace identity using the supplied verified laboratory history.
 
-- **C02A:** inspected `D:\Nikita\TM benchmark`, belonging to the separate
-  **TM Benchmarking (Mkrtich)** project. Its findings remain valid only for
-  that inspected folder. C02A was **not** an audit of the current LC
-  laboratory workspace.
-- **Current LC laboratory workspace — REPORTED/OBSERVED FROM USER EVIDENCE:**
-  `D:\Nikita\LC characterization (Alex)` is the separate Codex App workspace
-  for Alex's LC project. Only `AGENTS.md` has been confirmed inside it so far.
-  It has not received a dedicated audit; SDK locations and approved hardware
-  limits remain unknown. This is not a Codex inspection of that workspace.
+- **C02A historical correction — VERIFIED (supplied C07 evidence):**
+  `D:\Nikita\TM benchmark` was the earlier name of the **same** laboratory
+  workspace later renamed `D:\Nikita\LC characterization (Alex)`. It was
+  not a separate Mkrtich project. The old path is stale historical naming
+  only; earlier observations retain their original inspection scope.
+- **Current LC laboratory workspace — VERIFIED (supplied C07 evidence):**
+  `D:\Nikita\LC characterization (Alex)` currently contains only `AGENTS.md`.
+  Its authorized path was manually updated in that file to the current name.
+  Task-specific Python examples were supplied separately when needed and
+  are not canonical project files in this lab workspace. The home repository
+  is canonical for project/documentation; the lab workspace is the bounded
+  equipment/SDK execution environment. Codex (ALEX) and Codex (LAB) are
+  distinct executor contexts. C07 did not access the lab workspace.
 - User visual evidence showed `raw-frame.bin`, `capture-result.json`, and
   `camera-frame.py` in a separate laboratory location. Ownership, exact
   location, format, provenance, and authorization for use remain unverified.
@@ -75,10 +98,83 @@ not access laboratory paths or the external SDK-source folder.
   vendor distributions were present in that downloaded folder. None of the
   four files was executed or imported; source values are not approved
   hardware limits.
-- **C03A broader laboratory SDK/driver/document inventory: DEFERRED.** It
-  resumes only with sufficiently defined authorization for the relevant
-  laboratory locations and conditions. Nikita's general permission does not
-  establish unknown operating limits or unrestricted filesystem access.
+- **C03A historical status:** broader inventory was deferred at C04B. The
+  subsequent verified evidence is recorded below; it does not establish a
+  complete laboratory inventory, operating limits, or unrestricted access.
+
+## Laboratory capability validation — current C07 checkpoint
+
+All **VERIFIED** laboratory facts in this section come from the completed
+checks supplied in the C07 task, not new home-PC runtime or hardware tests.
+
+### VERIFIED — Windows device evidence
+
+- Device Manager showed ALKERIA `Celera C12SX-M Master SuperSpeed Camera`
+  and `Celera C12SX-M Slave SuperSpeed Camera`. At least the Slave explicitly
+  showed "This device is working properly." Observed camera driver:
+  provider Alkeria, version `1.2.3.3`, date `2013-05-02`.
+- Meadowlark `SLM P1920`, manufacturer Meadowlark Optics, showed working
+  properly; driver version `12.3.0.0`, date `2017-03-13`.
+- `Communications Port (COM1)` exists and was shown working. Its association
+  with the Viper laser is **UNKNOWN / NOT TESTED**.
+
+### VERIFIED — installed software and native SDK inventory
+
+Windows Installed Apps showed:
+
+- Blink OverDrive Plus `1.1.4.851`.
+- MaestroUSB3 `2.7.10`.
+- VISA Shared Components `5.12.0` (64-Bit).
+- VISA.NET Shared Components `5.11.0` (64-Bit).
+
+ALKERIA SDK installation was verified at
+`C:\Program Files\Alkeria\USB3\MaestroUSB3`, including native C++ and .NET
+SDKs, DLLs, `.lib` files, headers, Celera examples, and SDK documentation.
+This is installation evidence only; runtime camera operation and VISA
+instrument communication remain **NOT TESTED**.
+
+### VERIFIED — Python compatibility and native module loading
+
+- Original inspected package:
+  `C:\Users\Dell\AppData\Local\Programs\Python\Python312\Lib\site-packages\alkusb3`.
+  It includes Python wrapper source, `_core.cp39-win_amd64.pyd`, and
+  `CAlkUSB3-64.dll`.
+- Classification: `CP39_ONLY_BINARY_PACKAGE`. No CPython 3.12 native
+  extension or buildable native-extension source was found in the inspected
+  package/archive. This finding is limited to the inspected material.
+- Isolated environment: `C:\Users\Dell\Envs\PhotonicsAI-LC-py39`, with
+  CPython `3.9.25`, Windows AMD64, and NumPy `1.26.4`. `alkusb3` was copied
+  into it; source/destination package hashes matched.
+- Existing Python 3.12 installations were not intentionally modified;
+  Anaconda base was not targeted for modification; PATH was not modified.
+- Plain `import alkusb3` succeeded and did **not** load `alkusb3._core`.
+  Controlled `import alkusb3._core` subsequently succeeded, loading
+  `_core.cp39-win_amd64.pyd`. No vendor function or class was invoked in
+  that native-load test. Import success does not establish camera operation.
+
+### VERIFIED — C06A static inspection and intentional stop
+
+The wrapper exposes `device_interface.get_camera_list(self)` as an instance
+method delegating to `self._obj.get_camera_list()`. The ordinary wrapper path
+requires an existing native device/camera object. Static inspection did not
+establish a sufficiently bounded discovery path without object construction.
+
+**C06A status: `BLOCKED_BY_WRAPPER_BEHAVIOR`.** Actual discovery calls: **0**;
+camera classes instantiated: **0**; camera acquisition: **0**; hardware query:
+**0**. This was an intentional safety stop, not a software failure.
+
+### UNKNOWN / NOT TESTED — hardware boundary
+
+Still not performed: camera object construction, device discovery through
+the SDK, camera open, camera-setting reads, camera-setting writes,
+acquisition, or real frame capture. None is implied by OS visibility or
+native module loading.
+
+Still not authorized/performed through this project: SLM pattern write,
+RIGOL/VISA command, COM1 laser command, or laser state change. No physical
+experiment entries have been recorded; [EXPERIMENT_LOG.md](EXPERIMENT_LOG.md)
+is reserved for actual hardware actions and measurements, not software
+validation tasks.
 
 ## Completed offline component — C04A
 
@@ -246,7 +342,7 @@ their historical steps, not the current v0.2 baseline.
 ## Current implementation status
 
 **IMPLEMENTED:** deterministic offline Measurement Input v1 validator, CLI,
-and automated tests (C04A, currently uncommitted).
+and automated tests (C04A; C07 local working tree was clean on entry).
 
 **NOT IMPLEMENTED:** runtime LLM agents; Local Orchestrator runtime; shared
 knowledge catalogue runtime; reusable Experimental Skills runtime;
@@ -257,7 +353,20 @@ readiness or approved hardware settings.
 
 ## Repository
 
-**VERIFIED LOCALLY (C04B; no network access):**
+**VERIFIED LOCALLY (C07; no network access):**
+
+- Branch: `main`; no branch change.
+- HEAD: `7ff0b3b55a0a7517f5f87332c8421b6da62c11a8`.
+- Working tree clean on entry (`git status --short` produced no output);
+  no staged files. The C04B uncommitted-work description below is historical.
+- C07 changes only `CURRENT_STATE.md`, `DECISIONS.md`, and the new
+  `EXPERIMENT_LOG.md`; no staging, commit, push, fetch, or pull.
+- C07 did not contact the remote server; current remote contents and
+  synchronization were not independently reverified. User-reported push
+  evidence for the existing checkpoint is recorded below. The new C07
+  documentation changes remain uncommitted and are not published.
+
+**Historical local snapshot (C04B; superseded by the C07 check above):**
 
 - Branch: `main`.
 - HEAD: `9455e3e4ec60d53bde708416756d591ad3bc9a44` (the C00 baseline).
@@ -272,21 +381,31 @@ readiness or approved hardware settings.
   ?? tests/
   ```
 
-- Staged files: none. C01 documentation and C04A files remain uncommitted;
-  their presence on GitHub is not established. C04B modifies only this
-  already-modified handoff and does not stage or commit anything.
+- Staged files were none. C01 documentation and C04A files were uncommitted
+  at that snapshot, before the later checkpoint/push reported below. C04B
+  modified only this already-modified handoff and did not stage or commit
+  anything.
 
-**USER-REPORTED TERMINAL RESULT:** `git push -u origin main` successfully
-created/pushed `main` on the GitHub repository and set local `main` to track
-`origin/main`. This is separate from C04B's local checks. Current remote
-server contents and synchronization were not independently checked by C04B;
-no claim is made that C01/C04A changes are on GitHub.
+**USER-REPORTED TERMINAL EVIDENCE:** a previous successful push reported
+`9455e3e..7ff0b3b  main -> main`, establishing user-reported publication of
+commit `7ff0b3b` to `origin/main`. That checkpoint contains the previously
+committed C01/C04A/C04B work. An earlier reported `git push -u origin main`
+also established tracking of `origin/main`. These are user terminal reports,
+separate from C07's local checks: C07 did not contact the remote server or
+independently reverify its current state. The new C07 documentation changes
+are not included in that published checkpoint and are not already published.
 
 ## Pending
 
-- C04A Architect review has passed; the local Git checkpoint/publication
-  of the accepted C01+C04A+C04B work is still pending.
-- C03A laboratory inventory remains deferred under the conditions above.
+- C04A Architect review has passed. C07 verified a clean local checkpoint on
+  entry; publication of the C01/C04A/C04B checkpoint `7ff0b3b` is supported by
+  user-reported terminal evidence. Current remote state remains independently
+  unverified; the new C07 documentation changes remain uncommitted/unpublished.
+- Architect definition and explicit human approval of the minimum camera-
+  object construction test and its allowed observations, before any further
+  camera hardware call. This test is **not already approved**.
+- Any further laboratory inventory or hardware access needs its own bounded
+  task authorization; the supplied checks do not grant broader permission.
 - Researcher/Architect review of the
   [v0.2 draft](docs/ARCHITECTURE_V02_DRAFT.md) and resolution of its OPEN items.
 - Limited demonstration scope, initial metric, input measurements/metadata,
@@ -296,17 +415,21 @@ no claim is made that C01/C04A changes are on GitHub.
 - Later reconciliation of historical roles, contracts, diagrams, and
   instructions under a separately authorized task. Historical open questions
   in [DECISIONS.md](DECISIONS.md#open-questions-for-professor-review) remain
-  reference material, not an updated v0.2 decision log.
+  reference material. C07 appends operational decisions without migrating
+  the historical architecture decisions or contracts.
 
 ## Known blockers and unknowns
 
-- No validated device limits or safety rules exist yet, so real execution is
-  blocked.
+- No validated device operating limits or implemented command-level safety
+  enforcement exist yet. Native-load validation grants no hardware-action
+  permission; camera construction remains pending separate review/approval.
 - Whether the laser has (or should have) any software interface is unknown.
 - The Chief Orchestrator interface is unknown.
-- C02B provides source/example interface evidence only; installed laboratory
-  SDK/driver availability, versions, operational interfaces, and approved
-  limits remain unconfirmed. PyVISA for the RIGOL DG812 remains a plan.
+- C02B provides source/example interface evidence only. The supplied later
+  lab checks establish the specific installed software, drivers, SDK, and
+  Python compatibility recorded above. Camera operation, VISA communication,
+  laser interface identity, and approved operating limits remain unverified.
+  PyVISA control of the RIGOL DG812 remains a plan.
 - The priority of the characterization metrics has not been decided.
 - Positive feedback on the direction does not establish a working system or
   permission for unattended procedure reuse. Deterministic command-level
@@ -316,13 +439,16 @@ no claim is made that C01/C04A changes are on GitHub.
 - Transmission-matrix planning-test scope and migration of the historical
   contracts/checkpoints remain OPEN.
 
-## Next recommended step
+## Current next decision — OPEN, not approved
 
-After the accepted work is checkpointed in Git, the next **candidate**
-development task, requiring separate task authorization, is a small
-deterministic offline image-QC/measurement-analysis layer operating on
-validated Measurement Input v1 bundles on the home PC. It must
-not invent scientific acceptance thresholds or present synthetic fixtures as
-measurements. C03A remains deferred while laboratory authorization/path
-details are incomplete. The December 5 target remains a limited demonstration
-target, not a promise of full autonomy.
+Before any further camera hardware call, the Architect must define and the
+human must explicitly approve the **minimum camera-object construction
+test and its allowed observations**. No procedure for bypassing the C06A
+boundary is established here. Construction, enumeration, and acquisition
+remain separately approved stages; no approval is implied by this checkpoint.
+
+A small offline image-QC/measurement-analysis layer on validated Measurement
+Input v1 bundles remains a **PROPOSED** home-PC development candidate, subject
+to separate task authorization and justified scientific criteria. No next
+implementation step is started by C07. The December 5 target remains a
+limited demonstration target, not a promise of full autonomy.
