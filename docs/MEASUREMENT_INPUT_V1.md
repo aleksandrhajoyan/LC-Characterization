@@ -1,0 +1,285 @@
+# Measurement Input v1
+
+**Status: PROPOSED MVP CONTRACT — C04A.**
+
+This document specifies an offline interchange bundle and deterministic,
+read-only structural validation for the future Analyst. It does not approve
+the broader architecture, experimental methods, hardware settings, or any
+laboratory action. Historical v0.1 artifacts remain historical proposals;
+this document does not migrate their envelopes or approval workflow.
+
+## Scope and non-goals
+
+Version `1.0` supports lossless grayscale PNG containers with 8-bit or 16-bit
+samples and explicit metadata. This is an MVP interchange format, **not a
+claim about the native output format of the ALKERIA camera**.
+
+The component is not an AI agent, scientific image analysis, a camera adapter,
+a simulation of an LC experiment, or hardware-control software. Missing
+values must not be silently invented. Required nullable fields must still be
+present; `null` explicitly records unavailable information where permitted.
+
+Structural validity does not prove camera provenance, scientific correctness,
+safe hardware settings, or acceptable measurement quality. The validator
+cannot authenticate an operator, acquisition time, sample, or declared origin.
+A matching SHA-256 checks consistency with the manifest, not authenticity.
+
+## Directory structure
+
+```text
+<bundle_root>/
+  manifest.json
+  images/
+    frame_0000.png
+    ...
+```
+
+`manifest.json` is a UTF-8 JSON object. Each referenced frame is a regular PNG
+file inside the supplied root. The illustrated `images/` directory and frame
+names are the interchange layout; the validator accepts other safe relative
+frame paths inside the root and imposes no frame-name pattern. It checks only
+the manifest and its referenced files; it does not enumerate other contents.
+Extra files do not establish compatibility or undergo validation.
+
+## Manifest fields
+
+All fields in the following tables are required. JSON booleans do not count
+as integers or numbers. Non-empty strings must contain a non-whitespace
+character. No values are trimmed, normalized, defaulted, or inferred.
+Additional JSON members are currently ignored and are not validated; their
+presence does not extend the contract. Duplicate JSON object keys and
+nonstandard `NaN`/`Infinity` constants are rejected.
+
+| Root field | Type and rule |
+| --- | --- |
+| `schema_version` | Exact string `"1.0"` |
+| `measurement_id` | String matching `[A-Za-z0-9._-]{1,128}` |
+| `data_origin` | Exactly `"real_measurement"` or `"test_fixture"` |
+| `acquired_at` | Valid timestamp with explicit UTC offset or `Z`; see below |
+| `operator_id` | Non-empty string; presence/type only, no identity verification |
+| `sample_id` | Non-empty string |
+| `procedure_id` | Non-empty string or `null` |
+| `camera` | Object specified below |
+| `frames` | Non-empty list of frame objects specified below |
+| `notes` | String (including empty string) or `null` |
+
+| Camera field | Type and rule |
+| --- | --- |
+| `manufacturer` | Non-empty string or `null` |
+| `model` | Non-empty string or `null` |
+| `pixel_format` | Exactly `"mono8"` or `"mono16"` |
+| `exposure_time` | `null`, or object containing `value` and `unit` |
+| `exposure_time.value` | Finite JSON number greater than zero |
+| `exposure_time.unit` | Exactly `"us"`, `"ms"`, or `"s"`; no conversion |
+| `roi_px` | Object containing integer `x`, `y` >= 0 and integer `width`, `height` > 0 |
+| `binning` | Object containing integer `x`, `y` > 0 |
+
+There are no assumed camera dimensions, ROI, exposure, or binning settings.
+ROI/binning are checked for structure and signs only; this version does not
+infer their relation to saved image dimensions or validate device capability.
+Manufacturers/models are recorded declarations, not verified identities.
+
+| Frame field | Type and rule |
+| --- | --- |
+| `frame_index` | Integer >= 0, unique within the bundle; gaps and unordered indices allowed |
+| `file` | Non-empty safe relative POSIX-style path to a PNG; unique within the bundle |
+| `sha256` | Exactly 64 lowercase hexadecimal characters matching actual file bytes |
+| `captured_at` | Valid timestamp with explicit UTC offset or `Z` |
+| `width_px` | Integer > 0, matching PNG IHDR width |
+| `height_px` | Integer > 0, matching PNG IHDR height |
+
+Timestamp representation is `YYYY-MM-DDTHH:MM:SS[.fraction]Z` or
+`YYYY-MM-DDTHH:MM:SS[.fraction]+HH:MM` / `-HH:MM`, with calendar/time values
+validated. Naive timestamps, invalid dates, and invalid offset components are
+rejected. No temporal ordering, synchronization, or clock accuracy is inferred.
+
+### Origin declarations
+
+- `real_measurement`: the supplier declares that the input represents actual
+  acquired measurements. The declaration is not authenticated by validation.
+- `test_fixture`: explicitly synthetic software-test artifacts. These are
+  **not experimental results or scientific simulations** and must never be
+  presented as measurements. Every bundle generated by the C04A tests uses
+  this value.
+
+`simulation` is not a supported origin.
+
+## Placeholder example
+
+The following JSON illustrates field placement only. Angle-bracket strings
+stand for information to supply and deliberately prevent use as a valid
+bundle. Dimensions and indices illustrate software structure, not equipment
+specifications. No image, acquisition, operator, or scientific result is
+claimed. The checksum placeholder must be replaced by an actual file hash.
+
+```json
+{
+  "schema_version": "1.0",
+  "measurement_id": "PLACEHOLDER-ID",
+  "data_origin": "test_fixture",
+  "acquired_at": "<ISO-8601 timestamp with explicit UTC offset or Z>",
+  "operator_id": "<operator identifier>",
+  "sample_id": "<sample identifier>",
+  "procedure_id": null,
+  "camera": {
+    "manufacturer": null,
+    "model": null,
+    "pixel_format": "mono8",
+    "exposure_time": null,
+    "roi_px": {"x": 0, "y": 0, "width": 1, "height": 1},
+    "binning": {"x": 1, "y": 1}
+  },
+  "frames": [
+    {
+      "frame_index": 0,
+      "file": "images/frame_0000.png",
+      "sha256": "<64 lowercase hexadecimal characters computed from file bytes>",
+      "captured_at": "<ISO-8601 timestamp with explicit UTC offset or Z>",
+      "width_px": 1,
+      "height_px": 1
+    }
+  ],
+  "notes": "Placeholder only; no experimental data."
+}
+```
+
+## Validation rules
+
+### Filesystem and integrity
+
+Frame paths use forward slashes, are relative, and contain no `..` path
+components. Absolute paths, backslashes, empty or `.` components, drive/UNC
+paths, alternate data streams, NUL characters, Windows reserved device names,
+and components ending in a dot or space are rejected. Extensions must be
+`.png` case-insensitively. Frame-file uniqueness follows the host's path case
+rules (case-insensitive on Windows).
+
+All frame path components, the manifest, and the root itself are checked for
+symlinks/reparse points and rejected if found. Referenced paths must resolve
+inside the canonical supplied root. Missing files, non-regular files, and
+unreadable files are errors. Unsafe paths are rejected before reading their
+bytes. SHA-256 and PNG checks use the same bytes read from each frame file.
+
+Use a stable offline directory while validating. These path checks do not
+provide a security sandbox against concurrent filesystem replacement or
+authenticate hard-link provenance. File bytes are read into memory; this MVP
+does not impose a size quota or defend against resource exhaustion.
+
+### PNG container
+
+The validator checks the eight-byte signature, bounded complete chunks, CRC
+for each parsed chunk, valid chunk type spelling/reserved bit, one first
+IHDR of length 13, positive dimensions, and grayscale color type 0. Only
+sample depths 8 (`mono8`) and 16 (`mono16`) are supported. Compression and
+filter methods must be 0; interlace must be 0 or 1. IHDR dimensions must match
+the frame metadata. At least one IDAT is required. Exactly one empty IEND
+must terminate the file with no trailing bytes (including another IEND).
+
+Parsing stops at the first unrecoverable chunk/CRC error. Other independent
+metadata/file checks continue. This is deliberately a limited container
+check, not a complete PNG conformance decoder. IDAT is **not decompressed**;
+compressed stream integrity, scanline/filter content, Adam7 content, pixel
+values, and measurement quality are not checked. Passing does not guarantee
+that another PNG decoder can display the file.
+
+## Python API and JSON CLI
+
+```python
+from pathlib import Path
+from photonicsai_analyst import validate_measurement_bundle
+
+report = validate_measurement_bundle(Path("<explicit-bundle-root>"))
+json_serializable_report = report.to_dict()
+```
+
+`ValidationIssue` and `ValidationReport` are exported dataclasses. Issues have
+`severity` (`error` or `warning`), stable `code`, logical `path`, and human
+`message`. C04A emits errors only; `valid` is false on any error. Reports have
+`valid`, `bundle_root`, nullable `measurement_id` and `data_origin`,
+`files_checked`, and `issues`. The identifiers record string declarations
+when available, even if their values are rejected. `bundle_root` is canonical
+when resolvable. `files_checked` counts successfully read frame entries;
+repeated references count again but make the bundle invalid.
+
+Ordinary invalid input returns a report rather than raising. Unexpected
+internal failures are caught at the CLI boundary and produce an invalid JSON
+report with `INTERNAL_ERROR`. The CLI writes only JSON to stdout:
+
+```powershell
+$env:PYTHONPATH = Join-Path (Get-Location) 'src'
+$env:PYTHONDONTWRITEBYTECODE = '1'
+python -B -m photonicsai_analyst <bundle_root>
+```
+
+Replace `<bundle_root>` with the explicitly supplied path. Exit codes are 0
+for structurally valid input, 2 for completed invalid validation (also usage
+errors), and 1 for unexpected internal failure. Inputs are never written,
+copied, renamed, or deleted. No report file is created. The process-local
+bytecode setting / `-B` prevents Python import caches during use.
+
+### Stable issue codes
+
+| Code | Meaning |
+| --- | --- |
+| `MANIFEST_NOT_FOUND` | Missing root or manifest |
+| `MANIFEST_JSON_INVALID` | Invalid UTF-8/JSON, duplicate keys, or forbidden numeric constants |
+| `FIELD_MISSING` | Required field absent |
+| `FIELD_TYPE_INVALID` | Incorrect JSON type (also non-directory root) |
+| `FIELD_VALUE_INVALID` | Value outside the contract |
+| `TIMESTAMP_INVALID` | Invalid or timezone-free timestamp |
+| `PATH_UNSAFE` | Unsafe lexical path or resolved containment failure |
+| `FILE_MISSING` | Referenced frame absent |
+| `FILE_SYMLINK_REJECTED` | Symlink or reparse point encountered |
+| `FILE_EXTENSION_INVALID` | Frame path does not end in `.png` |
+| `FILE_TYPE_INVALID` | Manifest/frame is not a regular file |
+| `FILE_UNREADABLE` | File/path cannot be safely accessed or read |
+| `HASH_FORMAT_INVALID` | Invalid SHA-256 representation |
+| `HASH_MISMATCH` | File bytes differ from declared hash |
+| `PNG_INVALID` | PNG container/header rule failed |
+| `PNG_CRC_INVALID` | PNG chunk checksum failed |
+| `DIMENSION_MISMATCH` | PNG dimensions differ from frame metadata |
+| `PIXEL_FORMAT_MISMATCH` | PNG depth differs from declared pixel format |
+| `DUPLICATE_FRAME_INDEX` | Repeated frame index |
+| `DUPLICATE_FRAME_FILE` | Repeated frame file path |
+| `CLI_USAGE_INVALID` | CLI requires exactly one bundle-root argument |
+| `INTERNAL_ERROR` | Unexpected CLI-boundary failure; never a valid result |
+
+Missing fields use `FIELD_MISSING`. A hash with an incorrect type/representation
+uses `HASH_FORMAT_INVALID`; other incorrect JSON field types generally use
+`FIELD_TYPE_INVALID`. Consumers should use codes and paths, not parse messages.
+
+## Temporary tests and verification
+
+All images/manifests used by tests are generated in the current test process
+inside `with tempfile.TemporaryDirectory(prefix="photonicsai_c04a_")`.
+The context automatically cleans up even on failure. Tests never inspect the
+parent temporary directory or use pre-existing external data. Optional real
+symlink tests skip when the current Windows process lacks permission to
+create links; no privilege elevation is attempted. Separate mocked tests
+exercise link/reparse rejection without claiming real junction verification.
+CLI subprocesses run only
+the new validator with the installed Python runtime and bytecode disabled.
+
+From the repository root in PowerShell, with the process-local environment
+variables above:
+
+```powershell
+python --version
+python -B -m unittest discover -s tests -v
+git status --short
+```
+
+## Deferred and unverified
+
+Voltage, frequency, SLM settings, trigger settings, calibration metadata,
+uncertainty, and scientific metrics are deferred until their real requirements
+are verified. No defaults, operating limits, SDK calls, or device-control
+interfaces are established by this contract. Analysis readiness requires
+additional scientific review beyond a successful structural check.
+
+Unverified laboratory files such as `raw-frame.bin`, `capture-result.json`,
+and `camera-frame.py` must not be treated as compatible input until their
+format, ownership, provenance, and authorization are separately established.
+They were not used or inspected for C04A. Native camera formats, laboratory
+integration, scientific acceptance criteria, and hardware safety remain
+unverified. Transmission Matrix Retrieval remains out of scope.
