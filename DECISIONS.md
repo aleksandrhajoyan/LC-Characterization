@@ -328,3 +328,65 @@ observed Windows Master or Slave device node, without opening/selecting the
 camera. This next LAB step remains **OPEN and unapproved** and must be
 separately bounded by the Architect and explicitly human-approved.
 C14A records evidence only and authorizes no laboratory action.
+
+## Operational decisions — 2026-11-28 (C16A C15A OS-metadata reconciliation)
+
+Source: supplied completed C15A read-only Windows/OS metadata inspection;
+not independently repeated by Codex (ALEX). Earlier decisions remain the
+historical record at their checkpoints. C15A completes the OS-metadata
+reconciliation proposed in C14A-D1, without resolving the SDK-to-node mapping
+or granting approval for camera selection/open.
+
+### C16A-D1 — Accept ambiguous mapping and reject a unique serial discriminator
+
+**Date:** 2026-11-28. **Status: ACCEPTED evidence and interpretation boundary.**
+
+**C15A COMPLETE; verdict C. `AMBIGUOUS_MAPPING`.** Both Windows nodes were
+present and started in the supplied inspection:
+
+- Master: `USB\VID_297B&PID_D7F7\A0805E3B`.
+- Slave: `USB\VID_297B&PID_EF35\A0805E3B`.
+
+`A0805E3B` occurs in both InstanceIds and the corresponding registry key
+names. It must **not** be used as a unique Master/Slave discriminator.
+It was not found as a distinguishing value in the inspected hardware IDs,
+compatible IDs, display names/descriptions, parent IDs, container IDs, or
+direct registry values. Serial-based unique mapping therefore failed.
+
+The nodes have distinct PIDs, ContainerIds, and USB location paths, share
+the same root-hub parent, and are listed as siblings. Two present Windows
+nodes do not by themselves establish two independent physical cameras;
+the inspection also did not establish that they are parts/functions/
+connections of one camera assembly. Physical camera count remains **UNKNOWN**.
+
+The relationship between C13A's one logical SDK entry,
+`CELERA C12SX-M s/n A0805E3B`, and the two Windows nodes remains **UNKNOWN**,
+including which node corresponds to it and why `GetCameraList` returned one
+entry. Full node metadata, inspection limitations, and zero-action counts
+are recorded in [CURRENT_STATE.md](CURRENT_STATE.md).
+
+### C16A-D2 — Inspect vendor SDK semantics statically before camera selection
+
+**Date:** 2026-11-28. **Status: ACCEPTED approval boundary; static task OPEN.**
+
+No SetCamera/open decision should be based solely on OS node names. Vendor
+SDK semantics should be inspected statically before camera selection:
+determine from installed ALKERIA SDK documentation, headers, examples, and
+binding/native evidence how Celera Master/Slave nodes relate to one logical
+camera entry and how `GetCameraList` / `SetCamera` treat this topology.
+This is the **OPEN / PROPOSED** next technical task, requiring separate
+authorization; C16A does not perform it.
+
+C15A performed read-only OS metadata inspection only, with no `alkusb3`
+runtime or hardware action. Get-PnpDevice/CIM access errors and denied
+Master-node subkey enumeration were not bypassed; no elevation or
+access-policy changes were attempted. PnPUtil supplied the required
+read-only properties, and direct registry values were readable. C15A is not
+a physical experiment entry; [EXPERIMENT_LOG.md](EXPERIMENT_LOG.md) remains
+unchanged in C16A.
+
+Neither C15A nor this reconciliation establishes that `SetCamera`/open is
+safe or successful, or that acquisition works. SetCamera/open/select,
+camera SDK property reads, settings reads/writes, acquisition, and frame
+capture remain separately reviewed stages requiring explicit human
+approval. C16A authorizes no camera call, LAB access, or hardware action.

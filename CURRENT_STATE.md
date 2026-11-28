@@ -1,10 +1,16 @@
 # Current State
 
-_Last updated: 2026-11-28 (C14A — C13A canonical reconciliation)_
+_Last updated: 2026-11-28 (C16A — C15A OS-metadata canonical reconciliation)_
 
 ## Current objective
 
-**Current milestone: C13A PASS** — one explicitly human-approved
+**Current milestone: C15A COMPLETE — C. `AMBIGUOUS_MAPPING`.** Read-only
+Windows/OS metadata inspection found both Master and Slave nodes present
+and started, with `A0805E3B` in both InstanceIds. Serial-based unique
+Master/Slave mapping therefore failed. No `alkusb3` runtime or hardware
+action occurred in C15A.
+
+**Previous SDK milestone: C13A PASS** — one explicitly human-approved
 `celera_camera` construction succeeded; one `get_camera_list` call returned
 `builtins.list`, length **1**; exactly `result[0]` was observed, yielding
 **`CELERA C12SX-M s/n A0805E3B`**; ordinary process teardown completed.
@@ -18,20 +24,21 @@ returned one entry whose exact display-name string was 'CELERA C12SX-M s/n A0805
 Physical-device count, camera operability, and any Master/Slave mapping are
 not established.
 
-**Next technical step — OPEN, unapproved:** read-only OS/device-metadata
-reconciliation to determine whether serial `A0805E3B` can be mapped to the
-previously observed Windows Master or Slave device node, without
-opening/selecting the camera. This next LAB step must be separately bounded
-by the Architect and explicitly human-approved.
-This C14A documentation checkpoint authorizes no next implementation step or
+**Current next technical question — OPEN:** statically determine from
+installed ALKERIA SDK documentation, headers, examples, and binding/native
+evidence how Celera Master/Slave nodes relate to one logical camera entry
+and how `GetCameraList` / `SetCamera` treat this topology. Static inspection
+is the proposed next step, subject to separate task authorization. No
+SetCamera/open/select is authorized.
+This C16A documentation checkpoint authorizes no next implementation step or
 laboratory action. C06A's earlier `BLOCKED_BY_WRAPPER_BEHAVIOR` stop remains
 historical evidence, not the current camera-runtime boundary.
 
 Evidence labels used below:
 
 - **VERIFIED:** local checks explicitly identified as such, or completed lab
-  checks supplied as verified evidence in the C07, C10A, C12A, and C14A tasks.
-  The lab checks were not independently repeated by Codex (ALEX).
+  checks supplied as verified evidence in the C07, C10A, C12A, C14A, and C16A
+  tasks. The lab checks were not independently repeated by Codex (ALEX).
 - **REPORTED:** researcher/Architect reports without a corresponding verified
   check identified here.
 - **PROPOSED:** design or candidate work, not implementation or approval.
@@ -112,13 +119,15 @@ the workspace identity using the supplied verified laboratory history.
   subsequent verified evidence is recorded below; it does not establish a
   complete laboratory inventory, operating limits, or unrestricted access.
 
-## Laboratory capability validation — C07 baseline and C08A–C13A milestones
+## Laboratory capability validation — C07 baseline and C08A–C15A milestones
 
 All **VERIFIED** laboratory facts in this section come from the completed
-checks supplied in the C07, C10A, C12A, and C14A tasks, not new home-PC runtime or
-hardware tests. C12A records the supplied C11A audit and C11B runtime report
+checks supplied in the C07, C10A, C12A, C14A, and C16A tasks, not new home-PC
+runtime or hardware tests. C12A records the supplied C11A audit and C11B runtime report
 without accessing the lab PC or independently repeating either check.
 C14A records the supplied C13A runtime report on the same basis.
+C16A records the supplied C15A read-only OS-metadata inspection on the same
+basis; no LAB access or new device inspection occurred in C16A.
 
 ### VERIFIED — Windows device evidence
 
@@ -353,10 +362,75 @@ observed Windows Master/Slave entries remains **UNKNOWN**. No optical
 measurement was produced. Exact stdout and all supplied safety counts are
 recorded in the single C13A entry in [EXPERIMENT_LOG.md](EXPERIMENT_LOG.md).
 
+### VERIFIED — C15A COMPLETE: read-only Windows device-metadata reconciliation
+
+**Verdict: C. `AMBIGUOUS_MAPPING`.** The supplied C15A inspection reports
+both nodes as currently present and started. These are OS metadata facts
+at that inspection, not a fresh check by Codex (ALEX) or a camera-operability
+test. No `alkusb3` runtime or hardware action occurred.
+
+| Windows metadata field | Master node | Slave node |
+| --- | --- | --- |
+| Status | Started; present | Started; present |
+| Name / DeviceDesc | `Celera C12SX-M Master SuperSpeed Camera` | `Celera C12SX-M Slave SuperSpeed Camera` |
+| Class | `Image` | `Image` |
+| InstanceId | `USB\VID_297B&PID_D7F7\A0805E3B` | `USB\VID_297B&PID_EF35\A0805E3B` |
+| Driver | `oem29.inf`, version `1.2.3.3` | `oem29.inf`, version `1.2.3.3` |
+| Manufacturer / provider | `Alkeria www.alkeria.com` | `Alkeria www.alkeria.com` |
+| ClassGuid | `{6bdd1fc6-810f-11d0-bec7-08002be2092f}` | `{6bdd1fc6-810f-11d0-bec7-08002be2092f}` |
+| Original INF | `alkusb3.inf` | `alkusb3.inf` |
+| IsPresent | `TRUE` | `TRUE` |
+| ProblemCode | `0` | `0` |
+| HasProblem | `FALSE` | `FALSE` |
+| Parent | `USB\ROOT_HUB30\4&3a9dbbe2&0&0` | `USB\ROOT_HUB30\4&3a9dbbe2&0&0` |
+| ContainerId | `{cba5552a-f35f-5fe9-87d6-00f160fad7f1}` | `{805386bd-fb4f-5e21-99ad-b01ee4f5b862}` |
+| Hardware ID with revision | `USB\VID_297B&PID_D7F7&REV_0003` | `USB\VID_297B&PID_EF35&REV_0003` |
+| Hardware ID | `USB\VID_297B&PID_D7F7` | `USB\VID_297B&PID_EF35` |
+| Location | `Port_#0021.Hub_#0002` | `Port_#0024.Hub_#0002` |
+| BusReportedDeviceDesc | `CELERA C12SX-M` | `CELERA C12SX-M Slave` |
+
+**Serial search:** exact searched value `A0805E3B` occurs in **both**
+InstanceIds above and in their corresponding registry key names. It was
+not found as a distinguishing value in the inspected hardware IDs,
+compatible IDs, display names/descriptions, parent IDs, container IDs, or
+direct registry values. It therefore does **not** uniquely identify Master
+versus Slave; serial-based unique mapping failed.
+
+**Topology:** both nodes share the same root-hub parent, have distinct PIDs,
+ContainerIds, and USB location paths, and are listed as siblings. The
+reported location values are preserved above. These metadata do not
+establish whether there are two independent physical cameras or two
+parts/functions/connections of one camera assembly.
+
+C13A returned exactly one SDK display string:
+`CELERA C12SX-M s/n A0805E3B`. The relationship between that one logical SDK
+entry and these two Windows device nodes remains **UNKNOWN**, including
+which node corresponds to the entry and why the SDK returned one entry.
+Neither the OS names nor the shared instance-ID value establish selection
+semantics, safe/successful `SetCamera`/open, or working acquisition.
+
+**Inspection limitations:** `Get-PnpDevice` and CIM inspection returned:
+
+> Access to a CIM resource was not available to the client.
+
+PnPUtil supplied the required read-only properties. Direct registry values
+were readable; Master-node subkey enumeration was denied. No elevation or
+access-policy changes were attempted.
+
+**C15A safety counts:** each reported count was **0**: `alkusb3` imports;
+camera constructors; `get_camera_list`; SetCamera/open/select; settings;
+acquisitions; frames; device state changes; driver changes; registry writes;
+hardware actions; files modified on LAB; environment changes; Git operations
+on LAB. C15A was OS metadata inspection, with no hardware action or optical
+measurement; it is not a physical experiment entry.
+
 ### UNKNOWN / NOT TESTED — remaining camera and hardware boundary
 
-- Mapping of `A0805E3B` to the previously observed Windows Master/Slave device
-  node; physical camera identity and device count are not established.
+- Relationship between the one logical SDK entry and the two Windows
+  Master/Slave nodes. `A0805E3B` occurs in both InstanceIds and cannot
+  uniquely distinguish them; physical camera identity/count remain unknown.
+- Installed SDK semantics for the Master/Slave topology and its treatment
+  by `GetCameraList` / `SetCamera`.
 - Reason the SDK list count is `1` while two Windows Celera device entries
   were previously observed.
 - SetCamera / explicit open/select.
@@ -377,8 +451,9 @@ discovery path is not a runtime USB trace.
 Still not authorized/performed through this project: SLM pattern write,
 RIGOL/VISA command, COM1 laser command, or laser state change.
 [EXPERIMENT_LOG.md](EXPERIMENT_LOG.md) now contains three runtime-action entries
-(C09A-R2, C11B, and C13A) and no measurement; software inventory, static audits,
-and blocked pre-flight checks are not backfilled as physical experiments.
+(C09A-R2, C11B, and C13A) and no measurement; software/OS inventory, metadata
+inspection (including C15A), static audits, and blocked pre-flight checks
+are not backfilled as physical experiments. The log is unchanged in C16A.
 
 ## Completed offline component — C04A
 
@@ -557,7 +632,20 @@ readiness or approved hardware settings.
 
 ## Repository
 
-**VERIFIED LOCALLY (C14A; no network access):**
+**VERIFIED LOCALLY (C16A; no network access):**
+
+- Branch: `main`; HEAD: `a844d16a9161d05d84f275519b261ad9828f60f6`, matching
+  the required C16A checkpoint.
+- Working tree clean on entry: `git status --short` and `git diff --stat`
+  produced no output; no staged changes.
+- C16A changes only `CURRENT_STATE.md` and `DECISIONS.md`.
+  `EXPERIMENT_LOG.md` remains unchanged; C15A was not a hardware action.
+  These documentation changes remain uncommitted. No staging, commit, push,
+  fetch, pull, remote contact, LAB access, RustDesk, Python execution, or
+  hardware action in C16A.
+- Current remote contents and synchronization were not rechecked in C16A.
+
+**Historical local snapshot (C14A; superseded by the C16A check above):**
 
 - Branch: `main`; HEAD: `fd406b46d4fcfcab62e328f9d788b883cb281f63`, matching
   the required C14A checkpoint.
@@ -637,15 +725,17 @@ publication status is not independently verified.
 
 ## Pending
 
-- C04A Architect review has passed. C14A verified the clean canonical local
-  checkpoint `fd406b46d4fcfcab62e328f9d788b883cb281f63` on entry. Current remote
-  state remains independently unverified; the C14A documentation changes
+- C04A Architect review has passed. C16A verified the clean canonical local
+  checkpoint `a844d16a9161d05d84f275519b261ad9828f60f6` on entry. Current remote
+  state was not rechecked in C16A; the C16A documentation changes
   remain uncommitted/unpublished.
-- Read-only OS/device-metadata reconciliation to determine whether serial
-  `A0805E3B` can be mapped to the previously observed Windows Master or Slave
-  device node, without opening/selecting the camera. This next LAB step is
-  **OPEN and unapproved** and must be separately bounded by the Architect
-  and explicitly human-approved; completed C13A approval does not cover it.
+- **OPEN / PROPOSED:** statically determine from installed ALKERIA SDK
+  documentation, headers, examples, and binding/native evidence how Celera
+  Master/Slave nodes relate to one logical camera entry and how
+  `GetCameraList` / `SetCamera` treat this topology. C15A completed the
+  OS-metadata reconciliation with ambiguous mapping; the proposed static
+  inspection requires separate task authorization. SetCamera/open/select
+  remains unapproved.
 - Any further laboratory inventory or hardware access needs its own bounded
   task authorization; the supplied checks do not grant broader permission.
 - Researcher/Architect review of the
@@ -667,10 +757,12 @@ publication status is not independently verified.
   permission. C09A-R2 construction, C11B's success/type/length observation,
   and C13A's display-name observation were narrowly approved and completed;
   further camera escalation requires separate review and human approval.
-- The mapping of `A0805E3B` to Windows Master/Slave and the reason for one SDK
-  list entry versus two previously observed Windows Celera entries remain
-  **UNKNOWN**. SetCamera/open/select, property reads, settings reads/writes,
-  acquisition, and frame capture remain **NOT TESTED**.
+- C15A found `A0805E3B` in both Master and Slave InstanceIds; it must not be
+  used as a unique discriminator. The relationship of one logical SDK entry
+  to two present, started Windows nodes, the reason for the SDK count, and
+  physical camera count remain **UNKNOWN**. SetCamera/open/select, camera
+  SDK property reads, settings reads/writes, acquisition, and frame capture
+  remain **NOT TESTED**. OS metadata reads do not test SDK property access.
 - Whether the laser has (or should have) any software interface is unknown.
 - The Chief Orchestrator interface is unknown.
 - C02B provides source/example interface evidence only. The supplied later
@@ -687,14 +779,15 @@ publication status is not independently verified.
 - Transmission-matrix planning-test scope and migration of the historical
   contracts/checkpoints remain OPEN.
 
-## Current next technical step — OPEN, not approved
+## Current next technical question — OPEN, not approved
 
-**Read-only OS/device-metadata reconciliation to determine whether serial
-`A0805E3B` can be mapped to the previously observed Windows Master or Slave
-device node, without opening/selecting the camera.** This next LAB step
-remains **OPEN and unapproved** and must be separately bounded by the
-Architect and explicitly human-approved. C13A's completed display-name
-observation grants no permission for this step or other escalation.
+**Statically determine from installed ALKERIA SDK documentation, headers,
+examples, and binding/native evidence how Celera Master/Slave nodes relate
+to one logical camera entry and how `GetCameraList` / `SetCamera` treat this
+topology.** C15A's read-only OS-metadata inspection is complete, with verdict
+**C. `AMBIGUOUS_MAPPING`**. Further vendor SDK semantics inspection is
+**PROPOSED** and needs a separately bounded task; no such inspection starts
+in C16A. No SetCamera/open decision should be based solely on OS node names.
 SetCamera/open/select, property reads, settings reads/writes, acquisition,
 and frame capture remain separate later stages requiring their own review
 and explicit human approval. This documentation task authorizes no LAB step.
@@ -702,5 +795,5 @@ and explicit human approval. This documentation task authorizes no LAB step.
 A small offline image-QC/measurement-analysis layer on validated Measurement
 Input v1 bundles remains a **PROPOSED** home-PC development candidate, subject
 to separate task authorization and justified scientific criteria. No next
-implementation step is started by C14A. The December 5 target remains a
+implementation step is started by C16A. The December 5 target remains a
 limited demonstration target, not a promise of full autonomy.
