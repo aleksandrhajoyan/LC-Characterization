@@ -139,3 +139,73 @@ C06A is `BLOCKED_BY_WRAPPER_BEHAVIOR`: discovery calls 0, camera classes
 instantiated 0, acquisition 0, hardware query 0. This was an intentional
 safety stop, not a software failure. Do not bypass this boundary without a
 separately reviewed procedure and explicit human approval of its scope.
+
+## Operational decisions — 2026-11-28 (C10A camera milestone reconciliation)
+
+Source: supplied verified, Architect-reviewed C08A-R1, C08B, C09A pre-flight,
+and C09A-R2 evidence; not laboratory checks repeated by Codex (ALEX).
+The C07 decisions above are preserved as historical knowledge and approval
+status at that checkpoint. C10A-D1 and C10A-D2 supersede C07-D3's assumptions
+about construction/discovery separation and its pending construction test.
+No historical decision is rewritten as if these findings were already known.
+
+### C10A-D1 — Treat native construction and discovery as coupled
+
+**Date:** 2026-11-28. **Status: ACCEPTED implementation-specific finding.**
+
+C08B static disassembly established a conditional reachable path from
+`ICeleraCamera::Create()` through native construction/global initialization
+to OS device discovery/enumeration via Windows SetupAPI. Construction and
+enumeration are not separate stages for the exact inspected implementation.
+The inspected `CAlkUSB3-64.dll` (file/product version `2.5.24.0`) had SHA-256
+`93f4aa39752bcf60d9352d59fd9f8a184deda2e3246aa9d9a5f45d48d5184adf`;
+the package DLL hash matched. Previously observed Installed Apps version
+MaestroUSB3 `2.7.10` is a separate observation; the difference is unexplained.
+
+This is a reachable OS discovery path, not evidence that every construction
+opens a physical camera, transfers USB data, accesses settings/registers,
+starts acquisition, or creates a camera device handle. Complete native
+destruction side effects also remain unverified. C08B executed no vendor DLL,
+imported no `alkusb3`, invoked no vendor constructor, and took no hardware action.
+
+### C10A-D2 — Record the completed, narrowly approved C09A runtime action
+
+**Date:** 2026-11-28 (records execution on 2026-11-26).
+**Status: ACCEPTED completed action within approved scope.**
+
+Explicit human approval was:
+
+> APPROVE C09A exactly as specified. Construction + implicit discovery +
+> ordinary process teardown are approved. No enumeration method calls,
+> settings access, camera open, or acquisition.
+
+The initial C09A pre-flight stopped because the expected `Scripts\python.exe`
+path did not exist; no Python process, import, constructor, or hardware action
+occurred. C09A-PREFLIGHT-R1 found
+`C:\Users\Dell\Envs\PhotonicsAI-LC-py39\python.exe` (Python `3.9.25`) and
+the environment's `Lib\site-packages\alkusb3` by filesystem check, without
+vendor import or hardware action. These pre-flights are not physical experiments.
+
+C09A-R2 used that interpreter with `PYTHONDONTWRITEBYTECODE=1` and Python
+`-B`: one vendor Python process, one `celera_camera` constructor attempt,
+`CONSTRUCTION_SUCCEEDED`, wrapper type `alkusb3.celera_camera.celera_camera`,
+no stderr, exit code `0`. Ordinary process teardown completed; explicit vendor
+cleanup calls were `0`. All reported explicit enumeration, open, settings,
+acquisition, frame, other-device, retry, and environment/system-change counts
+were `0`. See [EXPERIMENT_LOG.md](EXPERIMENT_LOG.md) for the one runtime-action
+entry; no measurement was produced.
+
+### C10A-D3 — Keep further camera escalation separately reviewed and approved
+
+**Date:** 2026-11-28. **Status: ACCEPTED approval boundary; next step OPEN.**
+
+Successful construction does not authorize or establish an explicit
+`get_camera_list` result, list contents/count, Master/Slave identity through
+the SDK, SetCamera / camera selection/open, settings access, acquisition,
+frame capture, or validated camera operating limits. Future camera escalation
+remains separately reviewed by the Architect and explicitly human-approved.
+
+The next open decision is Architect definition + explicit human approval of
+the minimum explicit read-only camera-list observation, if scientifically/
+technically justified, with no SetCamera/open/settings/acquisition. This C10A
+documentation task grants no approval for that step or any hardware action.

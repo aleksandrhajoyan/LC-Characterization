@@ -1,27 +1,28 @@
 # Current State
 
-_Last updated: 2026-11-26 (C07-R1 — Architect review corrections)_
+_Last updated: 2026-11-28 (C10A — camera milestone canonical reconciliation)_
 
 ## Current objective
 
-Define and obtain explicit human approval for the minimum camera-object
-construction test and its allowed observations. Camera-object construction
-has **not been performed**, and the test is **not yet approved**. Device
-enumeration, camera-setting reads, camera-setting writes, and acquisition
-remain separate stages requiring their own approval.
+**Current milestone: C09A-R2 PASS** — one explicitly human-approved camera
+object construction succeeded and ordinary process teardown completed.
+C08B established that construction and OS device discovery/enumeration are
+coupled on a conditional reachable native path in the inspected implementation.
+Construction success does not establish camera selection/open, settings
+access, acquisition, frame capture, or validated camera operating limits.
 
-C07 reconciliation is complete. **Current milestone:** camera software stack
-validated through native module loading; first safe hardware interaction
-remains pending because wrapper discovery requires a native device/camera
-object. C06A stopped before hardware with `BLOCKED_BY_WRAPPER_BEHAVIOR`.
-This documentation checkpoint authorizes no next implementation step or
-laboratory action.
+**Next decision — OPEN, unapproved:** Architect definition + explicit human
+approval of the minimum explicit read-only camera-list observation, if
+scientifically/technically justified, with no SetCamera/open/settings/acquisition.
+This C10A documentation checkpoint authorizes no next implementation step or
+laboratory action. C06A's earlier `BLOCKED_BY_WRAPPER_BEHAVIOR` stop remains
+historical evidence, not the current construction boundary.
 
 Evidence labels used below:
 
 - **VERIFIED:** local checks explicitly identified as such, or completed lab
-  checks supplied as verified evidence in the C07 task. The lab checks were
-  not independently repeated by Codex (ALEX).
+  checks supplied as verified evidence in the C07 and C10A tasks. The lab
+  checks were not independently repeated by Codex (ALEX).
 - **REPORTED:** researcher/Architect reports without a corresponding verified
   check identified here.
 - **PROPOSED:** design or candidate work, not implementation or approval.
@@ -102,10 +103,11 @@ the workspace identity using the supplied verified laboratory history.
   subsequent verified evidence is recorded below; it does not establish a
   complete laboratory inventory, operating limits, or unrestricted access.
 
-## Laboratory capability validation — current C07 checkpoint
+## Laboratory capability validation — C07 baseline and C08A–C09A milestones
 
 All **VERIFIED** laboratory facts in this section come from the completed
-checks supplied in the C07 task, not new home-PC runtime or hardware tests.
+checks supplied in the C07 and C10A tasks, not new home-PC runtime or hardware
+tests. C10A records Architect-reviewed evidence without accessing the lab PC.
 
 ### VERIFIED — Windows device evidence
 
@@ -130,8 +132,9 @@ Windows Installed Apps showed:
 ALKERIA SDK installation was verified at
 `C:\Program Files\Alkeria\USB3\MaestroUSB3`, including native C++ and .NET
 SDKs, DLLs, `.lib` files, headers, Celera examples, and SDK documentation.
-This is installation evidence only; runtime camera operation and VISA
-instrument communication remain **NOT TESTED**.
+This is installation evidence only; the later constructor result is recorded
+below. Camera open/settings/acquisition and VISA instrument communication
+remain **NOT TESTED**.
 
 ### VERIFIED — Python compatibility and native module loading
 
@@ -163,18 +166,115 @@ establish a sufficiently bounded discovery path without object construction.
 camera classes instantiated: **0**; camera acquisition: **0**; hardware query:
 **0**. This was an intentional safety stop, not a software failure.
 
-### UNKNOWN / NOT TESTED — hardware boundary
+### VERIFIED — C08A-R1 static wrapper lifecycle audit
 
-Still not performed: camera object construction, device discovery through
-the SDK, camera open, camera-setting reads, camera-setting writes,
-acquisition, or real frame capture. None is implied by OS visibility or
-native module loading.
+Exact inspected package:
+`C:\Users\Dell\AppData\Local\Programs\Python\Python312\Lib\site-packages\alkusb3`.
+
+- `device_interface.__init__(self, obj)` assigns `self._obj = obj`.
+- `generic_camera.__init__(self, obj=None)` creates `_core.generic_camera()`
+  when `obj is None`; `matrix_camera.__init__(self, obj=None)` similarly
+  creates `_core.matrix_camera()` when `obj is None`.
+- `celera_camera.__init__(self)` assigns `self._obj = _core.celera_camera()`.
+- Python inheritance: `celera_camera -> matrix_camera -> generic_camera ->
+  device_interface`. Associated native/SDK hierarchy:
+  `ICeleraCamera -> IMatrixCamera -> IGenericCamera -> IDevice`.
+- Python finalizers visibly clear `self._obj`; concrete native destruction
+  semantics remained incompletely known.
+
+### VERIFIED — C08B static DLL audit: construction/discovery coupling
+
+Exact target DLL:
+`C:\Program Files\Alkeria\USB3\MaestroUSB3\Libraries\C++\Lib\V100 x64\CAlkUSB3-64.dll`.
+SHA-256: `93f4aa39752bcf60d9352d59fd9f8a184deda2e3246aa9d9a5f45d48d5184adf`.
+The package DLL had the identical hash. Target file/product version was
+`2.5.24.0`; previously observed Installed Apps version was MaestroUSB3
+`2.7.10`. The reason for this version difference is not established.
+
+Static disassembly established a conditional reachable path from
+`ICeleraCamera::Create()` through native construction/global initialization
+to Windows SetupAPI device discovery/enumeration, including reachable calls to:
+
+- `SetupDiGetClassDevsW`
+- `SetupDiEnumDeviceInfo`
+- `SetupDiGetDeviceRegistryPropertyW`
+- `SetupDiEnumDeviceInterfaces`
+- `SetupDiGetDeviceInterfaceDetailW`
+
+Construction and device discovery/enumeration are **not separable stages for
+this inspected implementation**. This establishes OS discovery/enumeration on
+a reachable construction path; it does not establish that every construction
+opens a physical camera, performs physical USB transfers, accesses settings or
+registers, starts acquisition, or creates a camera device handle.
+
+C08B counts: vendor DLL loads/executions **0**; `alkusb3` imports **0**;
+vendor constructors invoked **0**; hardware actions **0**.
+
+### VERIFIED — C09A blocked pre-flight and C09A-PREFLIGHT-R1 correction
+
+The initially expected interpreter
+`C:\Users\Dell\Envs\PhotonicsAI-LC-py39\Scripts\python.exe` did not exist.
+That attempt stopped at pre-flight: no Python process, import, constructor,
+or hardware action occurred. It is not a physical experiment-log entry.
+
+C09A-PREFLIGHT-R1 found the actual interpreter at
+`C:\Users\Dell\Envs\PhotonicsAI-LC-py39\python.exe`, verified Python
+`3.9.25`, and verified by filesystem check that `alkusb3` exists at
+`C:\Users\Dell\Envs\PhotonicsAI-LC-py39\Lib\site-packages\alkusb3`.
+No vendor import or hardware action occurred during this pre-flight.
+
+### VERIFIED — C09A-R2 PASS: approved construction and ordinary teardown
+
+Explicit human approval:
+
+> APPROVE C09A exactly as specified. Construction + implicit discovery +
+> ordinary process teardown are approved. No enumeration method calls,
+> settings access, camera open, or acquisition.
+
+The runtime used `C:\Users\Dell\Envs\PhotonicsAI-LC-py39\python.exe`,
+Python `3.9.25`, `PYTHONDONTWRITEBYTECODE=1`, and Python `-B`.
+Vendor Python processes: **1**; `celera_camera` constructor attempts: **1**.
+Observed stdout:
+
+```text
+CONSTRUCTION_STARTED
+CONSTRUCTION_SUCCEEDED
+WRAPPER_TYPE=alkusb3.celera_camera.celera_camera
+```
+
+Stderr: **NONE**. Process exit code: **0**. Ordinary Python process teardown
+completed; explicit vendor cleanup calls: **0**.
+
+Safety counts were **0** for each: explicit `get_camera_list` calls; explicit
+enumeration calls; SetCamera/open calls; settings reads; settings writes;
+acquisition calls; frames captured; SLM actions; RIGOL/VISA actions; laser/COM
+actions; retry attempts; environment/system changes.
+
+This was a hardware-adjacent camera-stack runtime interaction, not a
+measurement. It does not establish that a physical camera was opened, either
+Master/Slave camera was selected, settings are accessible, acquisition or
+frame capture works, or camera operating limits are validated.
+The actual action is recorded in [EXPERIMENT_LOG.md](EXPERIMENT_LOG.md).
+
+### UNKNOWN / NOT TESTED — remaining camera and hardware boundary
+
+- Explicit `get_camera_list` result and camera list contents/count.
+- Master/Slave identity through SDK.
+- SetCamera / explicit open/select.
+- Settings reads and settings writes.
+- Acquisition and real frame capture.
+- Complete native destruction side effects.
+- Validated camera operating limits (remain `TBD`).
+
+Exact physical USB activity and camera device-handle creation also remain
+unverified. Construction success and normal process exit do not resolve these
+unknowns; the static reachable discovery path is not a runtime USB trace.
 
 Still not authorized/performed through this project: SLM pattern write,
-RIGOL/VISA command, COM1 laser command, or laser state change. No physical
-experiment entries have been recorded; [EXPERIMENT_LOG.md](EXPERIMENT_LOG.md)
-is reserved for actual hardware actions and measurements, not software
-validation tasks.
+RIGOL/VISA command, COM1 laser command, or laser state change.
+[EXPERIMENT_LOG.md](EXPERIMENT_LOG.md) now contains one C09A-R2 runtime-action
+entry and no measurement; software inventory, static audits, and blocked
+pre-flight checks are not backfilled as physical experiments.
 
 ## Completed offline component — C04A
 
@@ -353,7 +453,18 @@ readiness or approved hardware settings.
 
 ## Repository
 
-**VERIFIED LOCALLY (C07; no network access):**
+**VERIFIED LOCALLY (C10A; no network access):**
+
+- Branch: `main`; HEAD: `e71cbc5c73fffcfb992b6599ae6f2e4e40827ee9`, matching
+  the supplied canonical checkpoint `e71cbc5`.
+- Working tree clean on entry: `git status --short`, `git diff --stat`, and
+  `git diff` produced no output; no staged changes.
+- C10A changes only `CURRENT_STATE.md`, `DECISIONS.md`, and `EXPERIMENT_LOG.md`.
+  These documentation changes remain uncommitted. No staging, commit, push,
+  fetch, pull, remote contact, lab-PC access, or hardware action in C10A.
+- Current remote contents and synchronization remain independently unverified.
+
+**Historical local snapshot (C07; superseded by the C10A check above):**
 
 - Branch: `main`; no branch change.
 - HEAD: `7ff0b3b55a0a7517f5f87332c8421b6da62c11a8`.
@@ -364,9 +475,9 @@ readiness or approved hardware settings.
 - C07 did not contact the remote server; current remote contents and
   synchronization were not independently reverified. User-reported push
   evidence for the existing checkpoint is recorded below. The new C07
-  documentation changes remain uncommitted and are not published.
+  documentation changes were uncommitted/unpublished at that snapshot.
 
-**Historical local snapshot (C04B; superseded by the C07 check above):**
+**Historical local snapshot (C04B; superseded by later checks above):**
 
 - Branch: `main`.
 - HEAD: `9455e3e4ec60d53bde708416756d591ad3bc9a44` (the C00 baseline).
@@ -393,17 +504,18 @@ committed C01/C04A/C04B work. An earlier reported `git push -u origin main`
 also established tracking of `origin/main`. These are user terminal reports,
 separate from C07's local checks: C07 did not contact the remote server or
 independently reverify its current state. The new C07 documentation changes
-are not included in that published checkpoint and are not already published.
+were not included in that reported published checkpoint; their current remote
+publication status is not independently verified.
 
 ## Pending
 
-- C04A Architect review has passed. C07 verified a clean local checkpoint on
-  entry; publication of the C01/C04A/C04B checkpoint `7ff0b3b` is supported by
-  user-reported terminal evidence. Current remote state remains independently
-  unverified; the new C07 documentation changes remain uncommitted/unpublished.
-- Architect definition and explicit human approval of the minimum camera-
-  object construction test and its allowed observations, before any further
-  camera hardware call. This test is **not already approved**.
+- C04A Architect review has passed. C10A verified the clean canonical local
+  checkpoint `e71cbc5` on entry. Current remote state remains independently
+  unverified; the C10A documentation changes remain uncommitted/unpublished.
+- Architect definition + explicit human approval of the minimum explicit
+  read-only camera-list observation, if scientifically/technically justified,
+  with no SetCamera/open/settings/acquisition. This next step is **OPEN and
+  unapproved**; C09A-R2 approval does not cover it.
 - Any further laboratory inventory or hardware access needs its own bounded
   task authorization; the supplied checks do not grant broader permission.
 - Researcher/Architect review of the
@@ -422,7 +534,8 @@ are not included in that published checkpoint and are not already published.
 
 - No validated device operating limits or implemented command-level safety
   enforcement exist yet. Native-load validation grants no hardware-action
-  permission; camera construction remains pending separate review/approval.
+  permission. C09A-R2 construction was narrowly approved and completed;
+  further camera escalation requires separate review and human approval.
 - Whether the laser has (or should have) any software interface is unknown.
 - The Chief Orchestrator interface is unknown.
 - C02B provides source/example interface evidence only. The supplied later
@@ -441,14 +554,15 @@ are not included in that published checkpoint and are not already published.
 
 ## Current next decision — OPEN, not approved
 
-Before any further camera hardware call, the Architect must define and the
-human must explicitly approve the **minimum camera-object construction
-test and its allowed observations**. No procedure for bypassing the C06A
-boundary is established here. Construction, enumeration, and acquisition
-remain separately approved stages; no approval is implied by this checkpoint.
+Architect definition + explicit human approval of the **minimum explicit
+read-only camera-list observation**, if scientifically/technically justified,
+with **no SetCamera/open/settings/acquisition**. This step remains OPEN and
+unapproved. C08B's construction/discovery coupling and C09A-R2's successful
+approved construction grant no permission for a subsequent explicit list call
+or other escalation. This documentation task does not authorize that step.
 
 A small offline image-QC/measurement-analysis layer on validated Measurement
 Input v1 bundles remains a **PROPOSED** home-PC development candidate, subject
 to separate task authorization and justified scientific criteria. No next
-implementation step is started by C07. The December 5 target remains a
+implementation step is started by C10A. The December 5 target remains a
 limited demonstration target, not a promise of full autonomy.
