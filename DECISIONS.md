@@ -289,3 +289,42 @@ settings writes, acquisition, and frame capture remain separate later
 stages requiring their own review and explicit human approval. Hotplug/list
 behavior and validated hardware operating limits remain unknown/not tested.
 C12A authorizes no runtime step or laboratory action.
+
+## Operational decision — 2026-11-28 (C14A C13A canonical reconciliation)
+
+### C14A-D1 — Record C13A display-name observation within its approved boundary
+
+**Date:** 2026-11-28. **Status: ACCEPTED completed action within approved scope.**
+
+Source: supplied completed C13A runtime report; not independently repeated
+by Codex (ALEX). **C13A PASS:** one `celera_camera` construction succeeded,
+one `get_camera_list` call returned `builtins.list`, length `1`, and exactly
+`result[0]` was observed under the approved length-equals-`1` condition.
+The exact SDK list display name was **`CELERA C12SX-M s/n A0805E3B`**.
+Ordinary teardown completed; no retry; no deviations. C13A completed within
+the human-approved scope recorded in [EXPERIMENT_LOG.md](EXPERIMENT_LOG.md).
+This hardware-adjacent runtime action produced no optical measurement.
+
+The verified fact is:
+
+> During the approved C13A invocation, get_camera_list returned one entry whose exact display-name string was 'CELERA C12SX-M s/n A0805E3B'.
+
+This establishes neither Master/Slave mapping nor camera operability. It
+does not establish that only one physical camera exists, that the other
+previously observed Windows device node is absent or broken, or that
+SetCamera/open, settings, or acquisition will succeed. The mapping between
+the SDK entry and the previously observed Windows Master/Slave entries,
+and the reason for one SDK entry versus two Windows entries, remain **UNKNOWN**.
+
+C13A supersedes only C12A-D4's pending status for this narrow display-name
+observation. Earlier decisions remain the historical record at their
+checkpoints. Camera open/select remains separately reviewed and requires
+explicit human approval, as do property reads, settings reads/writes,
+acquisition, and frame capture.
+
+The next open technical step is read-only OS/device-metadata reconciliation
+to determine whether serial `A0805E3B` can be mapped to the previously
+observed Windows Master or Slave device node, without opening/selecting the
+camera. This next LAB step remains **OPEN and unapproved** and must be
+separately bounded by the Architect and explicitly human-approved.
+C14A records evidence only and authorizes no laboratory action.

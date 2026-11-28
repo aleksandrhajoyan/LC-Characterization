@@ -1,13 +1,14 @@
 # Experiment Log
 
-Two hardware-adjacent camera-stack runtime interactions are recorded below
-(C09A-R2 and C11B). No optical measurement has been produced.
+Three hardware-adjacent camera-stack runtime interactions are recorded below
+(C09A-R2, C11B, and C13A). No optical measurement has been produced.
 
 This append-oriented log is reserved for REAL physical/hardware experimental
-actions and measurements, including the explicitly approved C09A-R2 and
-C11B camera-stack runtime interactions. Software inventory, package inspection,
-environment setup, and import/native-load validation are not experiment entries
-and are not backfilled here. C06A stopped before hardware; it produced no experiment.
+actions and measurements, including the explicitly approved C09A-R2, C11B,
+and C13A camera-stack runtime interactions. Software inventory, package
+inspection, environment setup, and import/native-load validation are not
+experiment entries and are not backfilled here. C06A stopped before hardware;
+it produced no experiment.
 
 Entries must record what actually happened, not intended or simulated
 results. Distinguish intended action from actual action; do not invent missing
@@ -167,3 +168,73 @@ Status: <actual completion/partial/aborted/denied outcome and reason>
   produced. This entry records supplied evidence, not a repeated runtime
   test, and grants no approval for further runtime action. Future observation
   of a returned display-name string remains OPEN and unapproved.
+
+### C13A — conditional camera display-name observation (not an optical measurement)
+
+- **Entry ID:** C13A.
+- **Date/time and timezone:** 2026-11-28, exact time not captured,
+  Asia/Yerevan (+04:00).
+- **Operator:** TBD — not specified in the supplied C13A facts.
+- **Procedure/version:** C13A; further version identifier not supplied (TBD).
+- **Approval/reference:** supplied human-approved C13A scope: one
+  `celera_camera` construction; one `get_camera_list` call; observe result
+  type and length; only if length equals `1`, observe exactly `result[0]`;
+  ordinary teardown; no retry. No SetCamera/open/select, properties,
+  settings, acquisition, or frame capture.
+- **Equipment:** ALKERIA Celera camera stack; SDK-returned display name
+  `CELERA C12SX-M s/n A0805E3B`; Windows Master/Slave mapping **UNKNOWN**.
+- **Sample:** N/A — no optical measurement or sample interaction.
+- **Intended action:** the single constructor/list call and conditional
+  display-name observation within the approved scope above.
+- **Actual action:** one constructor attempt succeeded; one
+  `get_camera_list` call returned; result type and length were observed;
+  because length was `1`, exactly `result[0]` was observed once. Ordinary
+  teardown completed; no retry. No camera was selected/opened. No
+  acquisition occurred.
+- **Runtime:** executable `C:\Users\Dell\Envs\PhotonicsAI-LC-py39\python.exe`;
+  Python `3.9.25`; process count: `1`; constructor attempts: `1`, succeeded;
+  `get_camera_list` calls: `1`, returned.
+- **Parameters with units:** N/A — no operating parameter was changed;
+  property reads and settings reads/writes were `0`.
+- **Files/data produced:** none; files modified: `0` in the C13A runtime.
+  No measurement produced.
+- **Observed result:** `builtins.list`, length `1`; exact display-name
+  string: `CELERA C12SX-M s/n A0805E3B`. Exact stdout:
+
+  ```text
+  CONSTRUCTION_STARTED
+  CONSTRUCTION_SUCCEEDED
+  GET_CAMERA_LIST_STARTED
+  GET_CAMERA_LIST_RETURNED
+  RESULT_TYPE=builtins.list
+  RESULT_LENGTH=1
+  DISPLAY_NAME=CELERA C12SX-M s/n A0805E3B
+  ```
+
+  Stderr: **NONE**. Exit code: `0`. Ordinary teardown: completed.
+  GUI/dialog/UAC: none observed.
+- **QC checks:** one process, one successful constructor, one returned
+  `get_camera_list` call, one conditional camera-name observation, zero
+  retries, based on the supplied C13A report.
+- **Uncertainty / limitations:** during the approved C13A invocation,
+  `get_camera_list` returned one entry whose exact display-name string was
+  `CELERA C12SX-M s/n A0805E3B`. This does not establish that `A0805E3B` is
+  Master or Slave, that only one physical camera exists, or that the other
+  previously observed Windows device node is absent or broken. The mapping
+  between this SDK-returned entry and the Windows Master/Slave device
+  entries remains **UNKNOWN**, as does the reason for one SDK entry versus
+  two previously observed Windows entries. SetCamera/open/select,
+  properties, settings, acquisition, and frame capture remain untested;
+  successful display-name observation does not establish camera operability.
+- **Deviations:** none.
+- **Safety notes:** camera-name observations: `1`. Each reported count was
+  `0`: SetCamera/open/select; property reads; settings reads; settings
+  writes; acquisitions; frames captured; retries; SLM; RIGOL/VISA;
+  laser/COM; files modified; persistent environment/system changes;
+  Git operations. These counts refer to the C13A runtime, not this C14A
+  documentation reconciliation.
+- **Status:** **PASS**, completed within approved scope; hardware-adjacent
+  runtime action, not an optical measurement. This entry records supplied
+  evidence and grants no further runtime approval. C13A completes the narrow
+  display-name observation listed as pending at the C11B checkpoint; the
+  historical C11B record is preserved.

@@ -1,33 +1,37 @@
 # Current State
 
-_Last updated: 2026-11-28 (C12A — C11A/C11B canonical reconciliation)_
+_Last updated: 2026-11-28 (C14A — C13A canonical reconciliation)_
 
 ## Current objective
 
-**Current milestone: C11B PASS** — one explicitly human-approved
+**Current milestone: C13A PASS** — one explicitly human-approved
 `celera_camera` construction succeeded; one `get_camera_list` call returned
-`builtins.list`, length **1**; ordinary process teardown completed.
+`builtins.list`, length **1**; exactly `result[0]` was observed, yielding
+**`CELERA C12SX-M s/n A0805E3B`**; ordinary process teardown completed.
 C11A static verdict: **A. `LIST_RESULT_IS_SAFE_VALUE_DATA`** for post-return
 observation of the materialized Python result; it does not establish or
 authorize all activity inside `GetCameraList`.
 C08B established that construction and OS device discovery/enumeration are
 coupled on a conditional reachable native path in the inspected implementation.
-The length means only: "During this exact approved GetCameraList invocation,
-the SDK returned one Python list entry." Physical-device count, camera
-identity, and any Master/Slave mapping are not established.
+The verified fact is: "During the approved C13A invocation, get_camera_list
+returned one entry whose exact display-name string was 'CELERA C12SX-M s/n A0805E3B'."
+Physical-device count, camera operability, and any Master/Slave mapping are
+not established.
 
-**Next decision — OPEN, unapproved:** Architect definition + explicit human
-approval of whether to observe the already-materialized display-name string
-from one future controlled `GetCameraList` result.
-This C12A documentation checkpoint authorizes no next implementation step or
+**Next technical step — OPEN, unapproved:** read-only OS/device-metadata
+reconciliation to determine whether serial `A0805E3B` can be mapped to the
+previously observed Windows Master or Slave device node, without
+opening/selecting the camera. This next LAB step must be separately bounded
+by the Architect and explicitly human-approved.
+This C14A documentation checkpoint authorizes no next implementation step or
 laboratory action. C06A's earlier `BLOCKED_BY_WRAPPER_BEHAVIOR` stop remains
 historical evidence, not the current camera-runtime boundary.
 
 Evidence labels used below:
 
 - **VERIFIED:** local checks explicitly identified as such, or completed lab
-  checks supplied as verified evidence in the C07, C10A, and C12A tasks. The lab
-  checks were not independently repeated by Codex (ALEX).
+  checks supplied as verified evidence in the C07, C10A, C12A, and C14A tasks.
+  The lab checks were not independently repeated by Codex (ALEX).
 - **REPORTED:** researcher/Architect reports without a corresponding verified
   check identified here.
 - **PROPOSED:** design or candidate work, not implementation or approval.
@@ -108,12 +112,13 @@ the workspace identity using the supplied verified laboratory history.
   subsequent verified evidence is recorded below; it does not establish a
   complete laboratory inventory, operating limits, or unrestricted access.
 
-## Laboratory capability validation — C07 baseline and C08A–C11B milestones
+## Laboratory capability validation — C07 baseline and C08A–C13A milestones
 
 All **VERIFIED** laboratory facts in this section come from the completed
-checks supplied in the C07, C10A, and C12A tasks, not new home-PC runtime or
+checks supplied in the C07, C10A, C12A, and C14A tasks, not new home-PC runtime or
 hardware tests. C12A records the supplied C11A audit and C11B runtime report
 without accessing the lab PC or independently repeating either check.
+C14A records the supplied C13A runtime report on the same basis.
 
 ### VERIFIED — Windows device evidence
 
@@ -317,13 +322,45 @@ the previously observed OS device entries and this SDK result length is
 **UNKNOWN**. The returned entry was not inspected. No optical measurement
 was produced.
 
+### VERIFIED — C13A PASS: approved display-name observation
+
+Human-approved scope: one `celera_camera` construction, one `get_camera_list`
+call, observation of result type and length, and only if length equals `1`,
+observation of exactly `result[0]`; ordinary teardown; no retry. No
+SetCamera/open/select, properties, settings, acquisition, or frame capture
+was approved or performed, according to the supplied C13A report.
+
+- Interpreter: `C:\Users\Dell\Envs\PhotonicsAI-LC-py39\python.exe`, Python
+  `3.9.25`; one Python process.
+- Constructor attempts: **1**, succeeded; `get_camera_list` calls: **1**, returned.
+- Result type: **`builtins.list`**; result length: **1**.
+- Exact returned display-name string: **`CELERA C12SX-M s/n A0805E3B`**.
+- Camera-name observations: **1**; SetCamera/open/select, property reads,
+  settings reads/writes, acquisitions, frames captured, retries, and
+  other-device actions: **0** each.
+- Stderr: **NONE**; exit code: **0**; ordinary teardown: **completed**;
+  GUI/dialog/UAC: **none observed**; deviations: **none**.
+
+The verified fact is:
+
+> During the approved C13A invocation, get_camera_list returned one entry whose exact display-name string was 'CELERA C12SX-M s/n A0805E3B'.
+
+This does not establish that `A0805E3B` is Master or Slave, that only one
+physical camera exists, that the other previously observed Windows device
+node is absent or broken, or that SetCamera/open, settings, or acquisition
+will work. The mapping between the SDK-returned entry and the previously
+observed Windows Master/Slave entries remains **UNKNOWN**. No optical
+measurement was produced. Exact stdout and all supplied safety counts are
+recorded in the single C13A entry in [EXPERIMENT_LOG.md](EXPERIMENT_LOG.md).
+
 ### UNKNOWN / NOT TESTED — remaining camera and hardware boundary
 
-- Returned camera display-name string.
-- Relationship of the SDK list entry to previously observed Master/Slave OS
-  devices; physical camera identity and device count are not established.
+- Mapping of `A0805E3B` to the previously observed Windows Master/Slave device
+  node; physical camera identity and device count are not established.
+- Reason the SDK list count is `1` while two Windows Celera device entries
+  were previously observed.
 - SetCamera / explicit open/select.
-- Serial/model/device properties.
+- Property reads, including serial/model/device properties.
 - Settings reads.
 - Settings writes.
 - Acquisition.
@@ -333,15 +370,15 @@ was produced.
 - Validated hardware operating limits, including camera limits (remain `TBD`).
 
 Exact physical USB activity and camera device-handle creation also remain
-unverified. Construction/list-call success and normal process exit do not
-resolve these unknowns; the static reachable discovery path is not a runtime
-USB trace.
+unverified. Construction/list-call success, display-name observation, and
+normal process exit do not resolve these unknowns; the static reachable
+discovery path is not a runtime USB trace.
 
 Still not authorized/performed through this project: SLM pattern write,
 RIGOL/VISA command, COM1 laser command, or laser state change.
-[EXPERIMENT_LOG.md](EXPERIMENT_LOG.md) now contains two runtime-action entries
-(C09A-R2 and C11B) and no measurement; software inventory, static audits, and blocked
-pre-flight checks are not backfilled as physical experiments.
+[EXPERIMENT_LOG.md](EXPERIMENT_LOG.md) now contains three runtime-action entries
+(C09A-R2, C11B, and C13A) and no measurement; software inventory, static audits,
+and blocked pre-flight checks are not backfilled as physical experiments.
 
 ## Completed offline component — C04A
 
@@ -520,7 +557,19 @@ readiness or approved hardware settings.
 
 ## Repository
 
-**VERIFIED LOCALLY (C12A; no network access):**
+**VERIFIED LOCALLY (C14A; no network access):**
+
+- Branch: `main`; HEAD: `fd406b46d4fcfcab62e328f9d788b883cb281f63`, matching
+  the required C14A checkpoint.
+- Working tree clean on entry: `git status --short` and `git diff --stat`
+  produced no output; no staged changes.
+- C14A changes only `CURRENT_STATE.md`, `DECISIONS.md`, and `EXPERIMENT_LOG.md`.
+  These documentation changes remain uncommitted. No staging, commit, push,
+  fetch, pull, remote contact, lab-PC access, RustDesk, Python execution, or
+  hardware action in C14A.
+- Current remote contents and synchronization remain independently unverified.
+
+**Historical local snapshot (C12A; superseded by the C14A check above):**
 
 - Branch: `main`; HEAD: `81c07ddfa8b927ae10ed9c3bc4075eda377a9d5f`, matching
   the required C12A checkpoint.
@@ -588,14 +637,15 @@ publication status is not independently verified.
 
 ## Pending
 
-- C04A Architect review has passed. C12A verified the clean canonical local
-  checkpoint `81c07ddfa8b927ae10ed9c3bc4075eda377a9d5f` on entry. Current remote
-  state remains independently unverified; the C12A documentation changes
+- C04A Architect review has passed. C14A verified the clean canonical local
+  checkpoint `fd406b46d4fcfcab62e328f9d788b883cb281f63` on entry. Current remote
+  state remains independently unverified; the C14A documentation changes
   remain uncommitted/unpublished.
-- Architect definition + explicit human approval of whether to observe the
-  already-materialized display-name string from one future controlled
-  `GetCameraList` result. This next step is **OPEN and unapproved**; C11B
-  approval does not cover it.
+- Read-only OS/device-metadata reconciliation to determine whether serial
+  `A0805E3B` can be mapped to the previously observed Windows Master or Slave
+  device node, without opening/selecting the camera. This next LAB step is
+  **OPEN and unapproved** and must be separately bounded by the Architect
+  and explicitly human-approved; completed C13A approval does not cover it.
 - Any further laboratory inventory or hardware access needs its own bounded
   task authorization; the supplied checks do not grant broader permission.
 - Researcher/Architect review of the
@@ -614,9 +664,13 @@ publication status is not independently verified.
 
 - No validated device operating limits or implemented command-level safety
   enforcement exist yet. Native-load validation grants no hardware-action
-  permission. C09A-R2 construction and C11B's success/type/length observation
-  were narrowly approved and completed; further camera escalation requires
-  separate review and human approval.
+  permission. C09A-R2 construction, C11B's success/type/length observation,
+  and C13A's display-name observation were narrowly approved and completed;
+  further camera escalation requires separate review and human approval.
+- The mapping of `A0805E3B` to Windows Master/Slave and the reason for one SDK
+  list entry versus two previously observed Windows Celera entries remain
+  **UNKNOWN**. SetCamera/open/select, property reads, settings reads/writes,
+  acquisition, and frame capture remain **NOT TESTED**.
 - Whether the laser has (or should have) any software interface is unknown.
 - The Chief Orchestrator interface is unknown.
 - C02B provides source/example interface evidence only. The supplied later
@@ -633,18 +687,20 @@ publication status is not independently verified.
 - Transmission-matrix planning-test scope and migration of the historical
   contracts/checkpoints remain OPEN.
 
-## Current next decision — OPEN, not approved
+## Current next technical step — OPEN, not approved
 
-Architect definition + explicit human approval of whether to observe the
-**already-materialized display-name string from one future controlled
-`GetCameraList` result**. This step remains **OPEN and unapproved**. C11A's
-post-return value-data finding and C11B's completed success/type/length
-observation grant no permission for that future call, string observation, or
-other escalation. SetCamera/open/properties/settings/acquisition remain
-separate later stages. This documentation task does not authorize that step.
+**Read-only OS/device-metadata reconciliation to determine whether serial
+`A0805E3B` can be mapped to the previously observed Windows Master or Slave
+device node, without opening/selecting the camera.** This next LAB step
+remains **OPEN and unapproved** and must be separately bounded by the
+Architect and explicitly human-approved. C13A's completed display-name
+observation grants no permission for this step or other escalation.
+SetCamera/open/select, property reads, settings reads/writes, acquisition,
+and frame capture remain separate later stages requiring their own review
+and explicit human approval. This documentation task authorizes no LAB step.
 
 A small offline image-QC/measurement-analysis layer on validated Measurement
 Input v1 bundles remains a **PROPOSED** home-PC development candidate, subject
 to separate task authorization and justified scientific criteria. No next
-implementation step is started by C12A. The December 5 target remains a
+implementation step is started by C14A. The December 5 target remains a
 limited demonstration target, not a promise of full autonomy.
