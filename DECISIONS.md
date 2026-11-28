@@ -209,3 +209,83 @@ The next open decision is Architect definition + explicit human approval of
 the minimum explicit read-only camera-list observation, if scientifically/
 technically justified, with no SetCamera/open/settings/acquisition. This C10A
 documentation task grants no approval for that step or any hardware action.
+
+## Operational decisions — 2026-11-28 (C12A C11A/C11B canonical reconciliation)
+
+Source: supplied completed C11A static audit and approved C11B runtime report;
+neither was independently repeated by Codex (ALEX). The earlier decisions
+remain the historical record of knowledge and approval at their checkpoints.
+C11B completes only the success/type/length observation described below,
+superseding C10A-D3's pending status for that narrow action. It does not
+approve further runtime work or change the proposed architecture.
+
+### C12A-D1 — Bound C11A's safe value-data finding to post-return observation
+
+**Date:** 2026-11-28. **Status: ACCEPTED implementation-specific static finding.**
+
+C11A verdict: **A. `LIST_RESULT_IS_SAFE_VALUE_DATA`**.
+`device_interface.get_camera_list(self)` returns
+`self._obj.get_camera_list()`; the native signature is
+`virtual Array<String> GetCameraList()`. Its owning array of string values is
+converted by the binding into a built-in Python `list` of built-in Python
+`str` entries. After return, result/entry types, length, iteration,
+positional indices, and reading/printing the returned display-name strings
+are local Python observations requiring no additional vendor SDK call.
+Vendor examples show `GetCameraList` / count / names before `SetCamera`.
+
+This finding neither establishes nor authorizes all activity inside
+`GetCameraList`. Device serial number, device camera property, name/device
+properties, `active_interfaces`, `super_speed`, and similar properties are
+separate native accesses outside the approved boundary. Static safety of
+post-return string observation is not runtime approval to perform it.
+
+### C12A-D2 — Record the explicitly approved, completed C11B observation
+
+**Date:** 2026-11-28. **Status: ACCEPTED completed action within approved scope.**
+
+The exact human approval was:
+
+> APPROVE C11B exactly as specified: one celera_camera construction, one get_camera_list call, observe only return/exception, Python result type, and list length; no camera names, SetCamera/open, properties/settings, or acquisition. Ordinary process teardown approved. No retry.
+
+C11B used `C:\Users\Dell\Envs\PhotonicsAI-LC-py39\python.exe`, Python
+`3.9.25`, `PYTHONDONTWRITEBYTECODE=1`, and `-B`. One Python process, one
+explicit import, one constructor attempt (succeeded), and one
+`get_camera_list` call (returned successfully) produced **`builtins.list`,
+length `1`**. Stderr: none; exit code: `0`; ordinary process teardown: yes;
+explicit cleanup calls and retries: `0`. No names, camera open/selection,
+property/settings access, acquisition, or frame capture occurred, according
+to the supplied report. See the single C11B entry in
+[EXPERIMENT_LOG.md](EXPERIMENT_LOG.md) for stdout, counts, deviations, and
+monitoring limitations. This was a hardware-adjacent runtime action; no
+optical measurement was produced.
+
+### C12A-D3 — Keep SDK list length separate from physical-device identification
+
+**Date:** 2026-11-28. **Status: ACCEPTED interpretation boundary.**
+
+`RESULT_LENGTH=1` means only:
+
+> During this exact approved GetCameraList invocation, the SDK returned one Python list entry.
+
+It does not establish physical-camera count, connected-Celera count, Master
+or Slave identity, an error in prior OS visibility of two Celera device
+entries, camera defect/unavailability, or successful selection/open.
+**No Master/Slave mapping is established.** The relationship between the
+previous OS device entries and this SDK result length remains **UNKNOWN**.
+The returned display-name string was not inspected.
+
+### C12A-D4 — Keep display-name observation and later stages separately approved
+
+**Date:** 2026-11-28. **Status: ACCEPTED approval boundary; next decision OPEN.**
+
+The next open decision is Architect definition + explicit human approval of
+whether to observe the already-materialized display-name string from one
+future controlled `GetCameraList` result. That runtime step remains **OPEN
+and unapproved**. C11A's static finding and C11B's completed approval grant
+no permission for the future call or display-name observation.
+
+SetCamera/select/open, serial/model/device properties, settings reads,
+settings writes, acquisition, and frame capture remain separate later
+stages requiring their own review and explicit human approval. Hotplug/list
+behavior and validated hardware operating limits remain unknown/not tested.
+C12A authorizes no runtime step or laboratory action.

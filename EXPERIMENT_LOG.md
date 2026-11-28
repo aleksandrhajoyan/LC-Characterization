@@ -1,11 +1,11 @@
 # Experiment Log
 
-One hardware-adjacent camera-stack runtime interaction is recorded below
-(C09A-R2). No optical measurement has been produced.
+Two hardware-adjacent camera-stack runtime interactions are recorded below
+(C09A-R2 and C11B). No optical measurement has been produced.
 
 This append-oriented log is reserved for REAL physical/hardware experimental
-actions and measurements, including the explicitly approved C09A-R2
-camera-stack runtime interaction. Software inventory, package inspection,
+actions and measurements, including the explicitly approved C09A-R2 and
+C11B camera-stack runtime interactions. Software inventory, package inspection,
 environment setup, and import/native-load validation are not experiment entries
 and are not backfilled here. C06A stopped before hardware; it produced no experiment.
 
@@ -100,3 +100,70 @@ Status: <actual completion/partial/aborted/denied outcome and reason>
 - **Status:** completed successfully within approved narrow scope; no
   measurement produced. This entry records supplied verified evidence and
   does not authorize further action.
+
+### C11B — explicit camera-list runtime observation (not a measurement)
+
+- **Entry ID:** C11B.
+- **Date/time and timezone:** 2026-11-28; exact execution time not captured in
+  the supplied report; Asia/Yerevan (+04:00).
+- **Operator:** Aleksandr Hajoyan, human-approved execution via Codex (LAB).
+- **Procedure/version:** `C11B-MINIMUM-EXPLICIT-CAMERA-LIST-RUNTIME`.
+- **Approval/reference:** explicit C11B human approval:
+
+  > APPROVE C11B exactly as specified: one celera_camera construction, one get_camera_list call, observe only return/exception, Python result type, and list length; no camera names, SetCamera/open, properties/settings, or acquisition. Ordinary process teardown approved. No retry.
+
+- **Equipment:** ALKERIA Celera camera stack; exact physical unit
+  corresponding to the returned entry not identified.
+- **Sample:** N/A — no optical measurement or sample interaction.
+- **Intended action:** one `celera_camera` constructor + one explicit
+  `get_camera_list` (`GetCameraList`) call; observe only return/exception,
+  Python result type, and list length; ordinary process teardown approved.
+- **Actual action:** one constructor attempt succeeded; one
+  `get_camera_list` call returned `builtins.list`, length `1`. Ordinary
+  process teardown completed; explicit cleanup calls: `0`.
+- **Runtime:** `C:\Users\Dell\Envs\PhotonicsAI-LC-py39\python.exe`, Python
+  `3.9.25`; `PYTHONDONTWRITEBYTECODE=1`; Python `-B`; Python processes: `1`;
+  explicit imports: `1`; constructor attempts: `1`; `get_camera_list` calls: `1`.
+- **Parameters with units:** N/A — no camera operating parameter was read
+  or changed.
+- **Files/data produced:** none; no measurement produced.
+- **Observed result:** exact stdout:
+
+  ```text
+  CONSTRUCTION_STARTED
+  CONSTRUCTION_SUCCEEDED
+  GET_CAMERA_LIST_STARTED
+  GET_CAMERA_LIST_RETURNED
+  RESULT_TYPE=builtins.list
+  RESULT_LENGTH=1
+  ```
+
+  Stderr: **NONE**. Process exit code: `0`. GUI/dialog/UAC: none observed at
+  the initial check; independent continuous visual monitoring was not performed.
+- **QC checks:** one process, one constructor attempt, one `get_camera_list`
+  call, zero retries; constructor succeeded and call returned successfully,
+  based on the supplied report.
+- **Uncertainty / limitations:** returned entry not inspected; returned
+  display-name string and physical camera identity unknown; no Master/Slave
+  mapping established. The relationship to previously observed OS
+  Master/Slave device entries is **UNKNOWN**. Internal discovery behavior and
+  hotplug/list behavior are not fully characterized. `RESULT_LENGTH=1` means
+  only: "During this exact approved GetCameraList invocation, the SDK returned
+  one Python list entry." It does not establish physical-camera count,
+  connected-Celera count, Master/Slave identity, an error in earlier OS
+  visibility, camera defect/unavailability, or successful camera selection/open.
+  C11A's post-return value-data finding does not establish or authorize all
+  activity inside `GetCameraList`.
+- **Deviations:** workspace root was listed before reading `AGENTS.md`;
+  the listing showed only `AGENTS.md`. Python version was verified via
+  executable metadata rather than launching an additional Python process.
+- **Safety notes:** each reported count was `0`: camera-name observations;
+  SetCamera/open/select; property reads; settings reads; settings writes;
+  acquisitions; frames captured; explicit cleanup calls; SLM actions;
+  RIGOL/VISA actions; laser/COM actions; retries; project modifications;
+  persistent environment/system changes; Git operations. These counts refer
+  to the C11B execution report, not this C12A documentation reconciliation.
+- **Status:** completed successfully within approved scope; no measurement
+  produced. This entry records supplied evidence, not a repeated runtime
+  test, and grants no approval for further runtime action. Future observation
+  of a returned display-name string remains OPEN and unapproved.
